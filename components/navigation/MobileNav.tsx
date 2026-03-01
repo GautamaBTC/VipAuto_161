@@ -7,12 +7,12 @@ import { FullscreenMenu } from "@/components/navigation/FullscreenMenu";
 import { NavLink } from "@/components/navigation/NavLink";
 
 const navItems = [
-  { href: "#compare", label: "Сравнение", icon: <Scale className="h-5 w-5" />, accent: "purple" as const },
-  { href: "#services", label: "Услуги", icon: <Cog className="h-5 w-5" />, accent: "teal" as const },
-  { href: "#advantages", label: "Преимущества", icon: <Award className="h-5 w-5" />, accent: "green" as const },
-  { href: "#process", label: "Процесс", icon: <ListChecks className="h-5 w-5" />, accent: "gold" as const },
-  { href: "#reviews", label: "Отзывы", icon: <MessageSquare className="h-5 w-5" />, accent: "pink" as const },
-  { href: "#contacts", label: "Контакты", icon: <Contact className="h-5 w-5" />, accent: "green" as const },
+  { href: "#compare", label: "Сравнение", icon: <Scale className="h-5 w-5" />, accent: "purple" as const, direction: "left" as const },
+  { href: "#services", label: "Услуги", icon: <Cog className="h-5 w-5" />, accent: "teal" as const, direction: "right" as const },
+  { href: "#advantages", label: "Преимущества", icon: <Award className="h-5 w-5" />, accent: "green" as const, direction: "left" as const },
+  { href: "#process", label: "Процесс", icon: <ListChecks className="h-5 w-5" />, accent: "gold" as const, direction: "right" as const },
+  { href: "#reviews", label: "Отзывы", icon: <MessageSquare className="h-5 w-5" />, accent: "pink" as const, direction: "left" as const },
+  { href: "#contacts", label: "Контакты", icon: <Contact className="h-5 w-5" />, accent: "green" as const, direction: "right" as const },
 ];
 
 export function MobileNav() {
@@ -33,6 +33,7 @@ export function MobileNav() {
             label={item.label}
             icon={item.icon}
             index={index}
+            direction={item.direction}
             accentColor={item.accent}
             onClick={close}
           />

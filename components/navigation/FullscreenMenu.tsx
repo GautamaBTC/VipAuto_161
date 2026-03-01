@@ -1,8 +1,9 @@
 "use client";
 
 import { useEffect, useRef, type ReactNode } from "react";
+import { createPortal } from "react-dom";
 import { gsap } from "gsap";
-import { ArrowUpRight, Clock, MapPin, Phone, X } from "lucide-react";
+import { ArrowUpRight, Clock, MapPin, Phone } from "lucide-react";
 import { cn } from "@/lib/cn";
 import { siteConfig } from "@/lib/siteConfig";
 
@@ -15,23 +16,43 @@ type FullscreenMenuProps = {
 export function FullscreenMenu({ isOpen, onClose, children }: FullscreenMenuProps) {
   const overlayRef = useRef<HTMLDivElement>(null);
   const panelRef = useRef<HTMLDivElement>(null);
-  const navRef = useRef<HTMLDivElement>(null);
+  const closeWrapRef = useRef<HTMLButtonElement>(null);
+  const closeLineARef = useRef<HTMLSpanElement>(null);
+  const closeLineBRef = useRef<HTMLSpanElement>(null);
+  const navRef = useRef<HTMLElement>(null);
   const footerRef = useRef<HTMLDivElement>(null);
+  const glowOneRef = useRef<HTMLDivElement>(null);
+  const glowTwoRef = useRef<HTMLDivElement>(null);
   const tlRef = useRef<gsap.core.Timeline | null>(null);
 
   useEffect(() => {
     const overlay = overlayRef.current;
     const panel = panelRef.current;
+    const closeWrap = closeWrapRef.current;
+    const closeLineA = closeLineARef.current;
+    const closeLineB = closeLineBRef.current;
     const nav = navRef.current;
     const footer = footerRef.current;
-    if (!overlay || !panel || !nav || !footer) return;
+    const glowOne = glowOneRef.current;
+    const glowTwo = glowTwoRef.current;
+    if (!overlay || !panel || !closeWrap || !closeLineA || !closeLineB || !nav || !footer || !glowOne || !glowTwo) return;
 
-    const navItems = nav.querySelectorAll("[data-nav-item]");
-    const footerEls = footer.querySelectorAll("[data-footer-el]");
+    const navItems = nav.querySelectorAll<HTMLElement>("[data-nav-item]");
+    const footerEls = footer.querySelectorAll<HTMLElement>("[data-footer-el]");
 
     gsap.set(overlay, { autoAlpha: 0, pointerEvents: "none" });
     gsap.set(panel, { xPercent: 105 });
-    gsap.set(navItems, { autoAlpha: 0, x: 80, skewX: -6 });
+    gsap.set(closeWrap, { autoAlpha: 0, scale: 0, rotate: -90 });
+    gsap.set(closeLineA, { width: 0 });
+    gsap.set(closeLineB, { width: 0 });
+    gsap.set(glowOne, { autoAlpha: 0 });
+    gsap.set(glowTwo, { autoAlpha: 0 });
+    gsap.set(navItems, {
+      autoAlpha: 0,
+      y: 50,
+      x: (index: number) => (index % 2 === 0 ? -60 : 60),
+      skewX: (index: number) => (index % 2 === 0 ? -10 : 10),
+    });
     gsap.set(footerEls, { autoAlpha: 0, y: 30 });
 
     const tl = gsap.timeline({
@@ -45,49 +66,75 @@ export function FullscreenMenu({ isOpen, onClose, children }: FullscreenMenuProp
     tl.to(overlay, {
       autoAlpha: 1,
       pointerEvents: "auto",
-      duration: 0.4,
+      duration: 0.32,
       ease: "power2.out",
     });
-
     tl.to(
       panel,
       {
         xPercent: 0,
         duration: 0.9,
-        ease: "expo.out",
       },
       0.05,
     );
-
+    tl.to(
+      closeWrap,
+      {
+        autoAlpha: 1,
+        scale: 1,
+        rotate: 0,
+        duration: 0.5,
+        ease: "back.out(2)",
+      },
+      0.1,
+    );
+    tl.to(closeLineA, { width: 28, duration: 0.35 }, 0.15);
+    tl.to(closeLineB, { width: 20, duration: 0.32 }, 0.18);
     tl.to(
       navItems,
       {
         autoAlpha: 1,
+        y: 0,
         x: 0,
         skewX: 0,
-        duration: 0.7,
-        stagger: 0.055,
-        ease: "expo.out",
+        duration: 0.9,
+        stagger: 0.08,
       },
-      0.3,
+      0.2,
     );
-
+    tl.to(glowOne, { autoAlpha: 1, duration: 0.4 }, 0.4);
+    tl.to(glowTwo, { autoAlpha: 1, duration: 0.4 }, 0.45);
     tl.to(
       footerEls,
       {
         autoAlpha: 1,
         y: 0,
-        duration: 0.6,
-        stagger: 0.07,
-        ease: "expo.out",
+        duration: 0.55,
+        stagger: 0.08,
       },
-      0.55,
+      0.5,
     );
 
-    tlRef.current = tl;
+    const pulseOne = gsap.to(glowOne, {
+      scale: 1.08,
+      duration: 3.2,
+      repeat: -1,
+      yoyo: true,
+      ease: "sine.inOut",
+    });
+    const pulseTwo = gsap.to(glowTwo, {
+      scale: 0.92,
+      duration: 3.6,
+      repeat: -1,
+      yoyo: true,
+      ease: "sine.inOut",
+    });
 
+    tlRef.current = tl;
     return () => {
       tl.kill();
+      pulseOne.kill();
+      pulseTwo.kill();
     };
   }, []);
 
@@ -99,7 +146,7 @@ export function FullscreenMenu({ isOpen, onClose, children }: FullscreenMenuProp
       tl.timeScale(1).play();
       document.body.style.overflow = "hidden";
     } else {
-      tl.timeScale(1.6).reverse();
+      tl.timeScale(1.5).reverse();
       document.body.style.overflow = "";
     }
 
@@ -109,71 +156,95 @@ export function FullscreenMenu({ isOpen, onClose, children }: FullscreenMenuProp
   }, [isOpen]);
 
   useEffect(() => {
-    const onKey = (event: KeyboardEvent) => {
+    const onKeyDown = (event: KeyboardEvent) => {
       if (event.key === "Escape" && isOpen) onClose();
     };
-    window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
   }, [isOpen, onClose]);
 
-  return (
-    <div ref={overlayRef} className="fixed inset-0 z-[1000]" style={{ visibility: "hidden", opacity: 0 }}>
-      <div className="absolute inset-0 bg-black/90 backdrop-blur-xl" onClick={onClose} aria-hidden="true" />
+  if (typeof document === "undefined") return null;
+
+  return createPortal(
+    <div ref={overlayRef} className="fixed inset-0 z-[9999]" style={{ visibility: "hidden", opacity: 0 }}>
+      <div
+        className="absolute inset-0 bg-[rgba(5,7,15,0.9)] backdrop-blur-xl"
+        onClick={onClose}
+        aria-hidden="true"
+      />
 
       <aside
         ref={panelRef}
         className={cn(
-          "absolute right-0 top-0 flex h-full w-full flex-col",
-          "bg-[#05070f] sm:w-[440px] sm:border-l sm:border-white/15",
+          "absolute right-0 top-0 flex h-full w-full flex-col overflow-hidden",
+          "bg-[rgba(5,7,15,0.88)] backdrop-blur-2xl sm:w-[460px] sm:border-l sm:border-white/10",
+          "shadow-[-10px_0_40px_rgba(0,0,0,0.55)]",
         )}
         role="dialog"
         aria-modal="true"
       >
-        <div aria-hidden className="pointer-events-none absolute -right-20 -top-32 h-[300px] w-[300px] rounded-full bg-[var(--accent)]/10 blur-[120px]" />
-        <div aria-hidden className="pointer-events-none absolute -bottom-20 -left-20 h-[250px] w-[250px] rounded-full bg-[var(--accent-2)]/8 blur-[100px]" />
+        <div
+          ref={glowOneRef}
+          aria-hidden
+          className="pointer-events-none absolute -left-28 top-24 h-56 w-56 rounded-full bg-[var(--accent)]/18 blur-[90px]"
+        />
+        <div
+          ref={glowTwoRef}
+          aria-hidden
+          className="pointer-events-none absolute -right-24 bottom-24 h-64 w-64 rounded-full bg-[var(--accent-2)]/18 blur-[96px]"
+        />
 
-        <div className="flex items-center justify-between px-6 pb-6 pt-20 sm:pt-24">
+        <div className="relative z-10 flex items-center justify-between px-6 pb-6 pt-20 sm:pt-24">
           <div>
-            <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-white/20">Навигация</p>
-            <div className="mt-2 h-px w-8 bg-gradient-to-r from-[var(--accent)] to-transparent" />
+            <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-white/30">Навигация</p>
+            <div className="mt-2 h-px w-12 bg-gradient-to-r from-[var(--accent)] to-transparent" />
           </div>
-          <div className="flex items-center gap-2">
-            <button
-              onClick={onClose}
-              aria-label="Закрыть меню"
-              className="flex h-9 w-9 items-center justify-center rounded-xl border border-white/15 bg-white/5 text-white/75 transition-colors duration-300 hover:bg-white/10 hover:text-white"
-            >
-              <X className="h-4 w-4" />
-            </button>
-            <kbd className="rounded bg-white/[0.08] px-1.5 py-0.5 text-[10px] text-white/55">esc</kbd>
-          </div>
+
+          <button
+            ref={closeWrapRef}
+            type="button"
+            onClick={onClose}
+            aria-label="Закрыть меню"
+            className="relative flex h-11 w-11 items-center justify-center rounded-xl border border-white/15 bg-white/5"
+          >
+            <span
+              ref={closeLineARef}
+              className="absolute h-[1.5px] -rotate-45 rounded-full bg-white/90"
+              style={{ transform: "translateX(2px) rotate(-45deg)" }}
+            />
+            <span
+              ref={closeLineBRef}
+              className="absolute h-[2px] rotate-45 rounded-full bg-[var(--accent-2)]"
+              style={{ transform: "translateX(-3px) translateY(1px) rotate(45deg)" }}
+            />
+          </button>
         </div>
 
-        <nav ref={navRef} className="menu-scroll flex-1 overflow-y-auto px-4 sm:px-5" role="navigation">
-          <div className="flex flex-col">{children}</div>
+        <nav ref={navRef} className="menu-scroll relative z-10 flex-1 overflow-y-auto px-4 sm:px-5" role="navigation">
+          <div className="flex flex-col gap-1">{children}</div>
         </nav>
 
-        <div ref={footerRef} className="mt-auto border-t border-white/10 px-6 pb-8 pt-6">
+        <div ref={footerRef} className="relative z-10 mt-auto border-t border-white/10 px-6 pb-8 pt-6">
           <a
             href={`tel:${siteConfig.phones[0]?.replace(/[^\d+]/g, "")}`}
             data-footer-el
-            className="group/f mb-3 flex items-center gap-3 text-sm text-white/45 transition-colors duration-300 hover:text-[#00b894]"
+            className="mb-3 flex items-center gap-3 text-sm text-white/65 transition-colors duration-300 hover:text-[#00b894]"
           >
-            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-[#00b894]/12 text-[#00b894] transition-transform duration-300 group-hover/f:scale-110">
+            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-[#00b894]/15 text-[#00b894]">
               <Phone className="h-4 w-4" />
             </div>
             {siteConfig.phones[0]}
           </a>
 
-          <div data-footer-el className="mb-3 flex items-center gap-3 text-sm text-white/35">
-            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-white/10 text-white/65">
+          <div data-footer-el className="mb-3 flex items-center gap-3 text-sm text-white/55">
+            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-white/10 text-white/70">
               <MapPin className="h-4 w-4" />
             </div>
             {siteConfig.address}
           </div>
 
-          <div data-footer-el className="mb-6 flex items-center gap-3 text-sm text-white/35">
-            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-white/10 text-white/65">
+          <div data-footer-el className="mb-6 flex items-center gap-3 text-sm text-white/55">
+            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-white/10 text-white/70">
               <Clock className="h-4 w-4" />
             </div>
             {siteConfig.schedule}
@@ -190,6 +261,7 @@ export function FullscreenMenu({ isOpen, onClose, children }: FullscreenMenuProp
           </a>
         </div>
       </aside>
-    </div>
+    </div>,
+    document.body,
   );
 }
