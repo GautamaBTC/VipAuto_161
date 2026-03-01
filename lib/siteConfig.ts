@@ -15,6 +15,7 @@ export const siteConfig = {
   inn: "615512388814",
   okpo: "0178696862",
   okved: "45.20",
+  registrationDate: "6 июня 2016",
   social: {
     telegram: "https://t.me/VipAuto_161",
     whatsapp: "https://wa.me/message/OHQIEET6AABBO1",

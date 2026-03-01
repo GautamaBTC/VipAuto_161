@@ -23,6 +23,9 @@ export function HeroSection() {
                 Премиальный центр автоэлектрики. Диагностика, StarLine, автосвет, кодирование блоков и сложные
                 электрические случаи.
               </p>
+              <div className="mt-4 inline-flex items-center rounded-full border border-[#0066cc66] bg-[#0066cc1a] px-3 py-1 text-xs font-semibold text-[#a7ccff]">
+                Официальный дилер StarLine
+              </div>
               <p className="mt-5 text-sm text-[var(--text-secondary)]">
                 <TypeWriter words={["заряжаем ваш автомобиль", "делаем сложную электрику понятной", "работаем точно и аккуратно"]} />
               </p>

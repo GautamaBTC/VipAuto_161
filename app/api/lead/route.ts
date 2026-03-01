@@ -26,7 +26,7 @@ function isRateLimited(ip: string, now: number): boolean {
 
 function formatTelegramMessage(payload: LeadPayload): string {
   return [
-    "Новая заявка с сайта VIPАвто",
+    "🔌 *Новая заявка с сайта VIPAuto*",
     `Имя: ${payload.name}`,
     `Телефон: ${payload.phone}`,
     `Услуга: ${payload.service}`,
@@ -41,7 +41,12 @@ export async function POST(request: Request) {
     return NextResponse.json({ ok: false, error: "rate_limited" }, { status: 429 });
   }
 
-  const body = (await request.json()) as Partial<LeadPayload>;
+  let body: Partial<LeadPayload>;
+  try {
+    body = (await request.json()) as Partial<LeadPayload>;
+  } catch {
+    return NextResponse.json({ ok: false, error: "invalid_json" }, { status: 400 });
+  }
   const name = body.name?.trim() ?? "";
   const phone = body.phone?.trim() ?? "";
   const service = body.service?.trim() ?? "";
@@ -63,6 +68,7 @@ export async function POST(request: Request) {
     body: JSON.stringify({
       chat_id: chatId,
       text: formatTelegramMessage({ name, phone, service, message }),
+      parse_mode: "Markdown",
     }),
   });
 
