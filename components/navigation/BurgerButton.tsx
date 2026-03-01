@@ -1,19 +1,20 @@
 "use client";
 
-import { forwardRef, useCallback, useEffect, useRef } from "react";
+import { useEffect, useRef } from "react";
 import { gsap } from "gsap";
 import { cn } from "@/lib/cn";
 
 type BurgerButtonProps = {
   isOpen: boolean;
   onToggle: () => void;
+  className?: string;
 };
 
-export const BurgerButton = forwardRef<HTMLButtonElement, BurgerButtonProps>(({ isOpen, onToggle }, ref) => {
+export function BurgerButton({ isOpen, onToggle, className }: BurgerButtonProps) {
   const topRef = useRef<HTMLSpanElement>(null);
   const midRef = useRef<HTMLSpanElement>(null);
   const botRef = useRef<HTMLSpanElement>(null);
-  const openTlRef = useRef<gsap.core.Timeline | null>(null);
+  const tlRef = useRef<gsap.core.Timeline | null>(null);
 
   useEffect(() => {
     const top = topRef.current;
@@ -21,78 +22,92 @@ export const BurgerButton = forwardRef<HTMLButtonElement, BurgerButtonProps>(({ 
     const bot = botRef.current;
     if (!top || !mid || !bot) return;
 
-    gsap.set([top, mid, bot], { clearProps: "all" });
-    gsap.set(top, { x: 0, y: 0, opacity: 1, scale: 1, width: "100%" });
-    gsap.set(mid, { x: 0, y: 0, opacity: 1, scale: 1, width: "75%" });
-    gsap.set(bot, { x: 0, y: 0, opacity: 1, scale: 1, width: "50%" });
+    const tl = gsap.timeline({
+      paused: true,
+      defaults: { duration: 0.4, ease: "power2.inOut" },
+    });
 
-    const tl = gsap.timeline({ paused: true });
-    tl.to(top, { x: 18, y: -8, opacity: 0, scale: 0.7, duration: 0.28, ease: "power3.in" }, 0);
-    tl.to(mid, { x: -24, opacity: 0, scale: 0.5, duration: 0.22, ease: "power3.in" }, 0);
-    tl.to(bot, { x: 22, y: 8, opacity: 0, scale: 0.7, duration: 0.28, ease: "power3.in" }, 0);
+    tl.to(mid, { scaleX: 0, autoAlpha: 0, duration: 0.2 }, 0)
+      .to(top, { top: "50%", yPercent: -50, duration: 0.3 }, 0)
+      .to(bot, { top: "50%", yPercent: -50, duration: 0.3 }, 0)
+      .to(
+        top,
+        {
+          rotation: 45,
+          width: "32px",
+          backgroundColor: "#ffffff",
+          duration: 0.5,
+          ease: "back.out(1.7)",
+        },
+        0.2,
+      )
+      .to(
+        bot,
+        {
+          rotation: -45,
+          width: "18px",
+          x: -4,
+          backgroundColor: "#ffffff",
+          duration: 0.5,
+          ease: "back.out(1.7)",
+        },
+        0.2,
+      );
 
-    openTlRef.current = tl;
+    tlRef.current = tl;
     return () => {
       tl.kill();
     };
   }, []);
 
   useEffect(() => {
-    const tl = openTlRef.current;
-    if (!tl) return;
-
     if (isOpen) {
-      tl.timeScale(1).play();
+      tlRef.current?.play();
     } else {
-      tl.timeScale(1.2).reverse();
+      tlRef.current?.reverse();
     }
   }, [isOpen]);
 
-  const handleMouseEnter = useCallback(() => {
-    if (isOpen) return;
-    gsap.to(topRef.current, { width: "70%", duration: 0.24, ease: "power2.out" });
-    gsap.to(midRef.current, { width: "100%", duration: 0.24, ease: "power2.out" });
-    gsap.to(botRef.current, { width: "85%", duration: 0.24, ease: "power2.out" });
-  }, [isOpen]);
-
-  const handleMouseLeave = useCallback(() => {
+  const handleMouseEnter = () => {
     if (isOpen) return;
     gsap.to(topRef.current, { width: "100%", duration: 0.3, ease: "power2.out" });
-    gsap.to(midRef.current, { width: "75%", duration: 0.3, ease: "power2.out" });
-    gsap.to(botRef.current, { width: "50%", duration: 0.3, ease: "power2.out" });
-  }, [isOpen]);
+    gsap.to(midRef.current, { width: "100%", x: 0, duration: 0.3, delay: 0.05, ease: "power2.out" });
+    gsap.to(botRef.current, { width: "100%", duration: 0.3, delay: 0.1, ease: "power2.out" });
+  };
+
+  const handleMouseLeave = () => {
+    if (isOpen) return;
+    gsap.to(topRef.current, { width: "24px", duration: 0.3, ease: "power2.out" });
+    gsap.to(midRef.current, { width: "32px", duration: 0.3, ease: "power2.out" });
+    gsap.to(botRef.current, { width: "18px", duration: 0.3, ease: "power2.out" });
+  };
 
   return (
     <button
-      ref={ref}
-      type="button"
       onClick={onToggle}
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
+      className={cn(
+        "group relative z-[10001] flex h-12 w-12 items-center justify-center rounded-full transition-colors hover:bg-white/5",
+        className,
+      )}
       aria-label={isOpen ? "Закрыть меню" : "Открыть меню"}
       aria-expanded={isOpen}
-      className={cn(
-        "relative z-[10001] flex h-12 w-12 items-center justify-center",
-        "cursor-pointer select-none rounded-none border-none bg-transparent outline-none",
-        "active:scale-90 transition-transform duration-200",
-        "focus-visible:outline-none",
-      )}
     >
-      <div className="relative flex h-[18px] w-7 flex-col items-end justify-between">
-        <span ref={topRef} className="block h-[2.5px] w-full origin-center rounded-full bg-white will-change-transform" />
+      <div className="relative h-[24px] w-[32px]">
+        <span
+          ref={topRef}
+          className="absolute right-0 top-0 block h-[2px] w-[24px] rounded-full bg-white will-change-transform"
+        />
         <span
           ref={midRef}
-          className="block h-[2.5px] origin-right rounded-full bg-white/70 will-change-transform"
-          style={{ width: "75%" }}
+          className="absolute right-0 top-[11px] block h-[2px] w-[32px] rounded-full bg-white will-change-transform"
         />
         <span
           ref={botRef}
-          className="block h-[2.5px] origin-right rounded-full bg-white/45 will-change-transform"
-          style={{ width: "50%" }}
+          className="absolute bottom-0 right-0 block h-[2px] w-[18px] rounded-full bg-white will-change-transform"
         />
       </div>
     </button>
   );
-});
-
-BurgerButton.displayName = "BurgerButton";
+}
