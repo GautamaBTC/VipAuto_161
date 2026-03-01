@@ -8,29 +8,29 @@ import { cn } from "@/lib/cn";
 import { useCountUp } from "@/components/stats/useCountUp";
 
 const accentMap = {
-  purple: {
-    iconBg: "bg-[#6c5ce71f]",
-    suffixColor: "text-[#8f81ff]",
-    lineClass: "from-transparent via-[#6c5ce7] to-transparent",
-    glowClass: "bg-[#6c5ce733]",
+  red: {
+    iconBg: "bg-[var(--accent)]/15",
+    suffixColor: "text-[var(--accent-2)]",
+    lineClass: "from-transparent via-[var(--accent)] to-transparent",
+    glowClass: "bg-[var(--accent)]/30",
   },
-  teal: {
-    iconBg: "bg-[#00cec91f]",
-    suffixColor: "text-[#5de9e4]",
-    lineClass: "from-transparent via-[#00cec9] to-transparent",
-    glowClass: "bg-[#00cec933]",
+  orange: {
+    iconBg: "bg-[var(--accent-2)]/15",
+    suffixColor: "text-[#ffb089]",
+    lineClass: "from-transparent via-[var(--accent-2)] to-transparent",
+    glowClass: "bg-[var(--accent-2)]/30",
   },
-  pink: {
-    iconBg: "bg-[#fd79a81f]",
-    suffixColor: "text-[#ff9dc0]",
-    lineClass: "from-transparent via-[#fd79a8] to-transparent",
-    glowClass: "bg-[#fd79a833]",
+  blue: {
+    iconBg: "bg-[#6ea8fd1f]",
+    suffixColor: "text-[#93c5fd]",
+    lineClass: "from-transparent via-[#60a5fa] to-transparent",
+    glowClass: "bg-[#60a5fa33]",
   },
-  gold: {
-    iconBg: "bg-[#fdcb6e1f]",
-    suffixColor: "text-[#ffd68d]",
-    lineClass: "from-transparent via-[#fdcb6e] to-transparent",
-    glowClass: "bg-[#fdcb6e33]",
+  green: {
+    iconBg: "bg-[#22c55e1f]",
+    suffixColor: "text-[#86efac]",
+    lineClass: "from-transparent via-[#22c55e] to-transparent",
+    glowClass: "bg-[#22c55e33]",
   },
 } as const;
 

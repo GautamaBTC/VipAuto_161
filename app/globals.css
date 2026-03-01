@@ -171,6 +171,95 @@ select:focus-visible {
   transition-duration: 400ms;
 }
 
+.comparison-card {
+  position: relative;
+  overflow: hidden;
+  border-radius: 24px;
+  border: 1px solid;
+  backdrop-filter: blur(20px);
+  transition: all 400ms ease;
+}
+
+.comparison-card--garage {
+  background: rgba(255, 255, 255, 0.02);
+  border-color: rgba(255, 255, 255, 0.08);
+}
+
+.comparison-card--garage:hover {
+  background: rgba(255, 255, 255, 0.04);
+  border-color: rgba(255, 255, 255, 0.12);
+}
+
+.comparison-card--vip {
+  background: color-mix(in srgb, var(--accent), transparent 88%);
+  border-color: color-mix(in srgb, var(--accent), white 76%);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.03);
+}
+
+.comparison-card--vip:hover {
+  background: color-mix(in srgb, var(--accent), transparent 82%);
+  border-color: color-mix(in srgb, var(--accent-2), white 70%);
+  box-shadow: 0 20px 80px -20px rgba(215, 23, 23, 0.35);
+}
+
+.comparison-vip-line {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  height: 2px;
+  width: 0;
+  border-bottom-left-radius: 999px;
+  border-bottom-right-radius: 999px;
+  background: linear-gradient(to right, transparent, var(--accent), transparent);
+  transition: width 500ms ease-out;
+}
+
+.comparison-card--vip:hover .comparison-vip-line {
+  width: 60%;
+}
+
+.comparison-vip-corner {
+  position: absolute;
+  top: -64px;
+  right: -64px;
+  width: 160px;
+  height: 160px;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--accent-2), transparent 88%);
+  filter: blur(60px);
+  opacity: 0;
+  transition: opacity 700ms ease;
+  pointer-events: none;
+}
+
+.comparison-card--vip:hover .comparison-vip-corner {
+  opacity: 1;
+}
+
+.comparison-garage-dashed {
+  position: absolute;
+  inset: 0;
+  border-radius: 24px;
+  border: 1px dashed rgba(239, 68, 68, 0.16);
+  pointer-events: none;
+}
+
+.comparison-divider {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.comparison-divider::before {
+  content: "";
+  position: absolute;
+  width: 1px;
+  height: 100%;
+  background: linear-gradient(to bottom, transparent, rgba(255, 255, 255, 0.18), transparent);
+}
+
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,

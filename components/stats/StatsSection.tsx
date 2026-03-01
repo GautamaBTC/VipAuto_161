@@ -8,7 +8,7 @@ import { useReducedMotion } from "@/hooks/useReducedMotion";
 import { stats } from "@/data/stats";
 import { StatCard, type AccentKey } from "@/components/stats/StatCard";
 
-const accentOrder: AccentKey[] = ["purple", "teal", "pink", "gold"];
+const accentOrder: AccentKey[] = ["red", "orange", "blue", "green"];
 
 export function StatsSection() {
   const gsap = useGSAP();
@@ -55,20 +55,20 @@ export function StatsSection() {
         className="pointer-events-none absolute left-1/2 top-1/2 h-[600px] w-[600px] -translate-x-1/2 -translate-y-1/2 rounded-full blur-[80px]"
         style={{
           background:
-            "radial-gradient(circle, rgba(108, 92, 231, 0.12) 0%, rgba(0, 206, 201, 0.06) 42%, transparent 72%)",
+            "radial-gradient(circle, rgba(215, 23, 23, 0.12) 0%, rgba(255, 95, 46, 0.08) 42%, transparent 72%)",
         }}
       />
 
       <div className="container-shell relative z-10">
         <div ref={headerRef} className="mb-14 text-center">
-          <div className="mb-5 inline-flex items-center gap-2 rounded-full border border-[#6c5ce733] bg-[#6c5ce71a] px-5 py-2 text-[13px] font-semibold uppercase tracking-wider text-[#b8afff]">
-            <span className="h-1.5 w-1.5 rounded-full bg-[#6c5ce7] animate-badge-pulse" />
+          <div className="mb-5 inline-flex items-center gap-2 rounded-full border border-[var(--accent)]/30 bg-[var(--accent)]/15 px-5 py-2 text-[13px] font-semibold uppercase tracking-wider text-[var(--accent-2)]">
+            <span className="h-1.5 w-1.5 rounded-full bg-[var(--accent)] animate-badge-pulse" />
             Наши результаты
           </div>
 
           <h2 className="text-[clamp(28px,5vw,44px)] font-bold leading-tight tracking-tight text-gray-100">
             Цифры, которые{" "}
-            <span className="bg-gradient-to-br from-[#6c5ce7] to-[#00cec9] bg-clip-text text-transparent">
+            <span className="bg-gradient-to-br from-[var(--accent)] to-[var(--accent-2)] bg-clip-text text-transparent">
               говорят за нас
             </span>
           </h2>
@@ -79,13 +79,13 @@ export function StatsSection() {
             const accent = accentOrder[index] ?? "purple";
             const icon =
               item.id === "experience" ? (
-                <Clock className="h-[22px] w-[22px] stroke-[#8f81ff]" strokeWidth={2} />
+                <Clock className="h-[22px] w-[22px] stroke-[var(--accent-2)]" strokeWidth={2} />
               ) : item.id === "rating" ? (
-                <Star className="h-[22px] w-[22px] stroke-[#5de9e4]" strokeWidth={2} />
+                <Star className="h-[22px] w-[22px] stroke-[#ffb089]" strokeWidth={2} />
               ) : item.id === "reviews" ? (
-                <Users className="h-[22px] w-[22px] stroke-[#ff9dc0]" strokeWidth={2} />
+                <Users className="h-[22px] w-[22px] stroke-[#93c5fd]" strokeWidth={2} />
               ) : (
-                <LayoutGrid className="h-[22px] w-[22px] stroke-[#ffd68d]" strokeWidth={2} />
+                <LayoutGrid className="h-[22px] w-[22px] stroke-[#86efac]" strokeWidth={2} />
               );
 
             return (
