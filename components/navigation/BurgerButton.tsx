@@ -1,67 +1,101 @@
 "use client";
 
-import { forwardRef } from "react";
+import { forwardRef, useCallback, useEffect, useImperativeHandle, useRef } from "react";
+import { gsap } from "gsap";
 import { cn } from "@/lib/cn";
+
+export type BurgerButtonHandle = {
+  animateOpen: () => void;
+  animateClose: () => void;
+};
 
 type BurgerButtonProps = {
   isOpen: boolean;
   onToggle: () => void;
 };
 
-export const BurgerButton = forwardRef<HTMLButtonElement, BurgerButtonProps>(
-  ({ isOpen, onToggle }, ref) => {
-    return (
-      <button
-        ref={ref}
-        type="button"
-        onClick={onToggle}
-        aria-label={isOpen ? "Закрыть меню" : "Открыть меню"}
-        aria-expanded={isOpen}
-        className={cn(
-          "group relative z-[200] flex h-12 w-12 items-center justify-center rounded-2xl border backdrop-blur-xl transition-all duration-500",
-          "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)]/50 active:scale-90",
-          isOpen
-            ? "border-white/15 bg-white/10"
-            : "border-white/10 bg-white/[0.03] hover:border-white/20 hover:bg-white/[0.07]",
-        )}
-      >
-        <span
-          className={cn(
-            "absolute inset-0 rounded-2xl opacity-0 transition-opacity duration-500 shadow-[0_0_20px_rgba(215,23,23,0.2)]",
-            "group-hover:opacity-100",
-            isOpen ? "!opacity-0" : "",
-          )}
-        />
+export const BurgerButton = forwardRef<BurgerButtonHandle, BurgerButtonProps>(({ isOpen, onToggle }, ref) => {
+  const topRef = useRef<HTMLSpanElement>(null);
+  const midRef = useRef<HTMLSpanElement>(null);
+  const botRef = useRef<HTMLSpanElement>(null);
+  const tlRef = useRef<gsap.core.Timeline | null>(null);
 
-        <div className="relative flex h-5 w-6 flex-col justify-between">
-          <span
-            className={cn(
-              "block h-[2px] origin-center rounded-full transition-all duration-500 [transition-timing-function:cubic-bezier(0.22,1,0.36,1)]",
-              isOpen
-                ? "w-full translate-y-[9px] rotate-45 bg-[var(--accent)]"
-                : "w-full bg-white/75 group-hover:w-5 group-hover:bg-white",
-            )}
-          />
-          <span
-            className={cn(
-              "block h-[2px] origin-center rounded-full transition-all duration-500 [transition-timing-function:cubic-bezier(0.22,1,0.36,1)]",
-              isOpen
-                ? "w-full scale-x-0 opacity-0 bg-white"
-                : "w-4 bg-white/55 group-hover:w-6 group-hover:bg-white/80",
-            )}
-          />
-          <span
-            className={cn(
-              "block h-[2px] origin-center rounded-full transition-all duration-500 [transition-timing-function:cubic-bezier(0.22,1,0.36,1)]",
-              isOpen
-                ? "w-full -translate-y-[9px] -rotate-45 bg-[var(--accent-2)]"
-                : "w-3 bg-white/35 group-hover:w-4 group-hover:bg-white/65",
-            )}
-          />
-        </div>
-      </button>
-    );
-  },
-);
+  useEffect(() => {
+    const top = topRef.current;
+    const mid = midRef.current;
+    const bot = botRef.current;
+    if (!top || !mid || !bot) return;
+
+    const tl = gsap.timeline({ paused: true });
+
+    tl.to(top, { y: 8, width: "100%", duration: 0.25, ease: "power2.in" }, 0);
+    tl.to(bot, { y: -8, width: "100%", duration: 0.25, ease: "power2.in" }, 0);
+    tl.to(mid, { scaleX: 0, opacity: 0, duration: 0.2, ease: "power2.in" }, 0);
+
+    tl.to(top, { rotation: 45, duration: 0.35, ease: "back.out(1.6)" }, 0.25);
+    tl.to(bot, { rotation: -45, duration: 0.35, ease: "back.out(1.6)" }, 0.25);
+
+    tlRef.current = tl;
+    return () => {
+      tl.kill();
+    };
+  }, []);
+
+  useEffect(() => {
+    const tl = tlRef.current;
+    if (!tl) return;
+
+    if (isOpen) tl.timeScale(1).play();
+    else tl.timeScale(1.3).reverse();
+  }, [isOpen]);
+
+  useImperativeHandle(ref, () => ({
+    animateOpen: () => tlRef.current?.play(),
+    animateClose: () => tlRef.current?.reverse(),
+  }));
+
+  const handleMouseEnter = useCallback(() => {
+    if (isOpen) return;
+    gsap.to(midRef.current, { width: "100%", duration: 0.3, ease: "power2.out" });
+    gsap.to(botRef.current, { width: "100%", duration: 0.3, ease: "power2.out", delay: 0.05 });
+  }, [isOpen]);
+
+  const handleMouseLeave = useCallback(() => {
+    if (isOpen) return;
+    gsap.to(midRef.current, { width: "60%", duration: 0.4, ease: "power2.out" });
+    gsap.to(botRef.current, { width: "36%", duration: 0.4, ease: "power2.out", delay: 0.05 });
+  }, [isOpen]);
+
+  return (
+    <button
+      type="button"
+      onClick={onToggle}
+      onMouseEnter={handleMouseEnter}
+      onMouseLeave={handleMouseLeave}
+      aria-label={isOpen ? "Close menu" : "Open menu"}
+      aria-expanded={isOpen}
+      className={cn(
+        "relative z-[200] flex h-12 w-12 items-center justify-center",
+        "cursor-pointer select-none rounded-none border-none bg-transparent outline-none",
+        "active:scale-90 transition-transform duration-200",
+        "focus-visible:outline-none",
+      )}
+    >
+      <div className="relative flex h-[18px] w-7 flex-col items-start justify-between">
+        <span ref={topRef} className="block h-[2.5px] w-full origin-center rounded-full bg-white will-change-transform" />
+        <span
+          ref={midRef}
+          className="block h-[2.5px] origin-left rounded-full bg-white/60 will-change-transform"
+          style={{ width: "60%" }}
+        />
+        <span
+          ref={botRef}
+          className="block h-[2.5px] origin-center rounded-full bg-white/35 will-change-transform"
+          style={{ width: "36%" }}
+        />
+      </div>
+    </button>
+  );
+});
 
 BurgerButton.displayName = "BurgerButton";

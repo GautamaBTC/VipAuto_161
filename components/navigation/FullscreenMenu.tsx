@@ -14,19 +14,25 @@ type FullscreenMenuProps = {
 
 export function FullscreenMenu({ isOpen, onClose, children }: FullscreenMenuProps) {
   const overlayRef = useRef<HTMLDivElement>(null);
-  const contentRef = useRef<HTMLDivElement>(null);
+  const panelRef = useRef<HTMLDivElement>(null);
+  const navRef = useRef<HTMLDivElement>(null);
   const footerRef = useRef<HTMLDivElement>(null);
   const tlRef = useRef<gsap.core.Timeline | null>(null);
 
   useEffect(() => {
     const overlay = overlayRef.current;
-    const content = contentRef.current;
+    const panel = panelRef.current;
+    const nav = navRef.current;
     const footer = footerRef.current;
-    if (!overlay || !content || !footer) return;
+    if (!overlay || !panel || !nav || !footer) return;
 
-    const navItems = content.querySelectorAll("[data-nav-item]");
-    const footerEls = Array.from(footer.children);
+    const navItems = nav.querySelectorAll("[data-nav-item]");
+    const footerEls = footer.querySelectorAll("[data-footer-el]");
+
     gsap.set(overlay, { autoAlpha: 0, pointerEvents: "none" });
+    gsap.set(panel, { xPercent: 105 });
+    gsap.set(navItems, { autoAlpha: 0, x: 80, skewX: -6 });
+    gsap.set(footerEls, { autoAlpha: 0, y: 30 });
 
     const tl = gsap.timeline({
       paused: true,
@@ -36,95 +42,136 @@ export function FullscreenMenu({ isOpen, onClose, children }: FullscreenMenuProp
       },
     });
 
-    tl.to(overlay, { autoAlpha: 1, pointerEvents: "auto", duration: 0.5 });
-    tl.fromTo(content, { xPercent: 100, skewX: -3 }, { xPercent: 0, skewX: 0, duration: 0.8 }, 0.1);
-    tl.fromTo(
-      navItems,
-      { autoAlpha: 0, x: 60, skewX: -4 },
-      { autoAlpha: 1, x: 0, skewX: 0, duration: 0.7, stagger: 0.06 },
-      0.35,
+    tl.to(overlay, {
+      autoAlpha: 1,
+      pointerEvents: "auto",
+      duration: 0.4,
+      ease: "power2.out",
+    });
+
+    tl.to(
+      panel,
+      {
+        xPercent: 0,
+        duration: 0.9,
+        ease: "expo.out",
+      },
+      0.05,
     );
-    tl.fromTo(footerEls, { autoAlpha: 0, y: 20 }, { autoAlpha: 1, y: 0, duration: 0.5, stagger: 0.08 }, 0.6);
+
+    tl.to(
+      navItems,
+      {
+        autoAlpha: 1,
+        x: 0,
+        skewX: 0,
+        duration: 0.7,
+        stagger: 0.055,
+        ease: "expo.out",
+      },
+      0.3,
+    );
+
+    tl.to(
+      footerEls,
+      {
+        autoAlpha: 1,
+        y: 0,
+        duration: 0.6,
+        stagger: 0.07,
+        ease: "expo.out",
+      },
+      0.55,
+    );
 
     tlRef.current = tl;
+
     return () => {
       tl.kill();
     };
   }, []);
 
   useEffect(() => {
-    const originalOverflow = document.body.style.overflow;
     const tl = tlRef.current;
     if (!tl) return;
 
     if (isOpen) {
-      document.body.style.overflow = "hidden";
       tl.timeScale(1).play();
+      document.body.style.overflow = "hidden";
     } else {
+      tl.timeScale(1.6).reverse();
       document.body.style.overflow = "";
-      tl.timeScale(1.5).reverse();
     }
 
     return () => {
-      document.body.style.overflow = originalOverflow;
+      document.body.style.overflow = "";
     };
   }, [isOpen]);
 
   useEffect(() => {
-    const onKeyDown = (event: KeyboardEvent) => {
+    const onKey = (event: KeyboardEvent) => {
       if (event.key === "Escape" && isOpen) onClose();
     };
-    window.addEventListener("keydown", onKeyDown);
-    return () => window.removeEventListener("keydown", onKeyDown);
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
   }, [isOpen, onClose]);
 
   return (
-    <div ref={overlayRef} className="fixed inset-0 z-[100] pointer-events-none">
-      <div className="absolute inset-0 bg-[var(--bg-primary)]/50 backdrop-blur-sm" onClick={onClose} aria-hidden />
+    <div ref={overlayRef} className="fixed inset-0 z-[100]" style={{ visibility: "hidden", opacity: 0 }}>
+      <div className="absolute inset-0 bg-black/60 backdrop-blur-md" onClick={onClose} aria-hidden="true" />
 
       <aside
-        ref={contentRef}
+        ref={panelRef}
         className={cn(
-          "absolute right-0 top-0 flex h-full w-full flex-col border-l border-white/10 bg-[rgba(10,10,20,0.9)] backdrop-blur-2xl sm:w-[480px] lg:w-[520px]",
+          "absolute right-0 top-0 flex h-full w-full flex-col",
+          "bg-[#08081a] sm:w-[440px] sm:border-l sm:border-white/10 sm:bg-[#08081a]/95 sm:backdrop-blur-2xl",
         )}
         role="dialog"
         aria-modal="true"
       >
-        <div aria-hidden className="pointer-events-none absolute -top-20 right-10 h-[200px] w-[300px] rounded-full bg-[var(--accent)]/15 blur-[100px]" />
-        <div aria-hidden className="pointer-events-none absolute bottom-20 left-10 h-[180px] w-[250px] rounded-full bg-[var(--accent-2)]/10 blur-[80px]" />
+        <div aria-hidden className="pointer-events-none absolute -right-20 -top-32 h-[300px] w-[300px] rounded-full bg-[var(--accent)]/10 blur-[120px]" />
+        <div aria-hidden className="pointer-events-none absolute -bottom-20 -left-20 h-[250px] w-[250px] rounded-full bg-[var(--accent-2)]/8 blur-[100px]" />
 
-        <div className="flex items-center justify-between px-6 pb-4 pt-6 sm:px-8">
-          <span className="text-xs font-semibold uppercase tracking-wider text-white/20">Навигация</span>
-          <button onClick={onClose} className="text-xs text-white/35 transition-colors hover:text-white/65">
-            ESC
+        <div className="flex items-center justify-between px-6 pb-6 pt-20 sm:pt-24">
+          <div>
+            <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-white/20">Menu</p>
+            <div className="mt-2 h-px w-8 bg-gradient-to-r from-[var(--accent)] to-transparent" />
+          </div>
+          <button
+            onClick={onClose}
+            className="flex items-center gap-2 rounded-xl px-3 py-1.5 text-[11px] font-medium tracking-wider text-white/30 transition-colors duration-300 hover:text-white/60"
+          >
+            close
+            <kbd className="rounded bg-white/[0.06] px-1.5 py-0.5 text-[10px]">esc</kbd>
           </button>
         </div>
 
-        <nav className="menu-scroll flex-1 overflow-y-auto px-4 sm:px-6" role="navigation">
-          <div className="flex flex-col gap-1 py-4">{children}</div>
+        <nav ref={navRef} className="menu-scroll flex-1 overflow-y-auto px-4 sm:px-5" role="navigation">
+          <div className="flex flex-col">{children}</div>
         </nav>
 
-        <div ref={footerRef} className="border-t border-white/10 px-6 py-6 sm:px-8">
+        <div ref={footerRef} className="mt-auto border-t border-white/10 px-6 pb-8 pt-6">
           <a
             href={`tel:${siteConfig.phones[0]?.replace(/[^\d+]/g, "")}`}
-            className="group/f mb-4 flex items-center gap-3 text-sm text-white/45 transition-colors hover:text-[var(--accent-2)]"
+            data-footer-el
+            className="group/f mb-3 flex items-center gap-3 text-sm text-white/45 transition-colors duration-300 hover:text-[#00b894]"
           >
-            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-[var(--accent)]/12 text-[var(--accent)] transition-transform duration-300 group-hover/f:scale-110">
-              <Phone className="h-3.5 w-3.5" />
+            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-[#00b894]/12 text-[#00b894] transition-transform duration-300 group-hover/f:scale-110">
+              <Phone className="h-4 w-4" />
             </div>
             {siteConfig.phones[0]}
           </a>
 
-          <div className="mb-4 flex items-center gap-3 text-sm text-white/35">
-            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-white/10 text-white/65">
-              <MapPin className="h-3.5 w-3.5" />
+          <div data-footer-el className="mb-3 flex items-center gap-3 text-sm text-white/35">
+            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-white/10 text-white/65">
+              <MapPin className="h-4 w-4" />
             </div>
             {siteConfig.address}
           </div>
 
-          <div className="mb-6 flex items-center gap-3 text-sm text-white/35">
-            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-white/10 text-white/65">
-              <Clock className="h-3.5 w-3.5" />
+          <div data-footer-el className="mb-6 flex items-center gap-3 text-sm text-white/35">
+            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-white/10 text-white/65">
+              <Clock className="h-4 w-4" />
             </div>
             {siteConfig.schedule}
           </div>
@@ -132,9 +179,10 @@ export function FullscreenMenu({ isOpen, onClose, children }: FullscreenMenuProp
           <a
             href={siteConfig.social.whatsapp}
             onClick={onClose}
-            className="group/cta flex w-full items-center justify-center gap-2 rounded-2xl border border-[var(--accent)]/35 bg-[var(--accent)]/16 px-6 py-3.5 text-sm font-semibold text-[var(--accent-2)] transition-all duration-400 hover:border-[var(--accent)]/45 hover:bg-[var(--accent)]/24 hover:shadow-[0_0_30px_rgba(215,23,23,0.18)] active:scale-[0.97]"
+            data-footer-el
+            className="group/cta flex w-full items-center justify-center gap-2 rounded-2xl bg-[#00b894] px-6 py-4 text-sm font-bold text-[var(--bg-primary)] transition-all duration-300 hover:bg-[#00b894]/90 hover:shadow-[0_0_40px_rgba(0,184,148,0.2)] active:scale-[0.97]"
           >
-            Записаться на диагностику
+            Book diagnostics
             <ArrowUpRight className="h-4 w-4 transition-transform duration-300 group-hover/cta:translate-x-0.5 group-hover/cta:-translate-y-0.5" />
           </a>
         </div>

@@ -1,7 +1,8 @@
 "use client";
 
-import { forwardRef, type ReactNode } from "react";
+import { useCallback, useRef, type ReactNode } from "react";
 import Link from "next/link";
+import { gsap } from "gsap";
 import { cn } from "@/lib/cn";
 
 type NavLinkProps = {
@@ -9,58 +10,119 @@ type NavLinkProps = {
   label: string;
   icon?: ReactNode;
   index: number;
-  accentColorClass?: string;
+  accentColor?: "purple" | "teal" | "green" | "pink" | "gold";
   onClick?: () => void;
 };
 
-export const NavLink = forwardRef<HTMLAnchorElement, NavLinkProps>(
-  ({ href, label, icon, index, accentColorClass = "text-[var(--accent)]", onClick }, ref) => {
-    return (
-      <Link
-        ref={ref}
-        href={href}
-        onClick={onClick}
-        data-nav-item
-        className={cn(
-          "group/link relative flex items-center gap-5 rounded-2xl px-6 py-5 transition-all duration-400 hover:bg-white/[0.03]",
-          "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)]/50",
-        )}
-      >
-        <span className="font-mono text-xs tabular-nums tracking-wider text-white/20 transition-colors duration-400 group-hover/link:text-white/40">
-          {String(index + 1).padStart(2, "0")}
-        </span>
+const accentStyles: Record<NonNullable<NavLinkProps["accentColor"]>, { iconBg: string; iconText: string; line: string }> = {
+  purple: {
+    iconBg: "bg-[var(--accent)]/10",
+    iconText: "text-[var(--accent)]",
+    line: "bg-[var(--accent)]/35",
+  },
+  teal: {
+    iconBg: "bg-[var(--accent-2)]/12",
+    iconText: "text-[var(--accent-2)]",
+    line: "bg-[var(--accent-2)]/35",
+  },
+  green: {
+    iconBg: "bg-[#00b894]/12",
+    iconText: "text-[#00b894]",
+    line: "bg-[#00b894]/35",
+  },
+  pink: {
+    iconBg: "bg-[#f472b6]/12",
+    iconText: "text-[#f472b6]",
+    line: "bg-[#f472b6]/35",
+  },
+  gold: {
+    iconBg: "bg-[#fbbf24]/12",
+    iconText: "text-[#fbbf24]",
+    line: "bg-[#fbbf24]/35",
+  },
+};
 
-        {icon ? (
-          <div
-            className={cn(
-              "flex h-10 w-10 items-center justify-center rounded-xl bg-white/[0.04] transition-all duration-400 group-hover/link:scale-110 group-hover/link:-rotate-3",
-              accentColorClass,
-            )}
-          >
-            {icon}
-          </div>
-        ) : null}
+export function NavLink({ href, label, icon, index, accentColor = "purple", onClick }: NavLinkProps) {
+  const iconRef = useRef<HTMLDivElement>(null);
+  const arrowRef = useRef<HTMLDivElement>(null);
+  const lineRef = useRef<HTMLSpanElement>(null);
 
-        <span className="text-2xl font-bold tracking-tight text-white/80 transition-all duration-400 group-hover/link:translate-x-2 group-hover/link:text-white sm:text-3xl">
-          {label}
-        </span>
+  const handleEnter = useCallback(() => {
+    gsap.to(iconRef.current, {
+      scale: 1.15,
+      rotation: -6,
+      duration: 0.4,
+      ease: "back.out(2)",
+    });
+    gsap.to(arrowRef.current, {
+      x: 0,
+      autoAlpha: 1,
+      duration: 0.3,
+      ease: "power2.out",
+    });
+    gsap.to(lineRef.current, {
+      scaleX: 1,
+      duration: 0.5,
+      ease: "expo.out",
+    });
+  }, []);
 
-        <svg
-          className="ml-auto h-5 w-5 -translate-x-2 text-white/0 transition-all duration-400 group-hover/link:translate-x-0 group-hover/link:text-white/40"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth={2}
-          strokeLinecap="round"
-          strokeLinejoin="round"
+  const handleLeave = useCallback(() => {
+    gsap.to(iconRef.current, {
+      scale: 1,
+      rotation: 0,
+      duration: 0.3,
+      ease: "power2.out",
+    });
+    gsap.to(arrowRef.current, {
+      x: -12,
+      autoAlpha: 0,
+      duration: 0.25,
+      ease: "power2.in",
+    });
+    gsap.to(lineRef.current, {
+      scaleX: 0,
+      duration: 0.3,
+      ease: "power2.in",
+    });
+  }, []);
+
+  const a = accentStyles[accentColor];
+
+  return (
+    <Link
+      href={href}
+      onClick={onClick}
+      data-nav-item
+      onMouseEnter={handleEnter}
+      onMouseLeave={handleLeave}
+      className={cn(
+        "relative flex items-center gap-4 px-3 py-5 sm:gap-5 sm:px-4 sm:py-6",
+        "transition-colors duration-300 hover:bg-white/[0.02]",
+        "focus-visible:rounded-xl focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[var(--accent)]/40",
+      )}
+    >
+      <span className="w-5 shrink-0 font-mono text-[11px] tabular-nums text-white/20">{String(index + 1).padStart(2, "0")}</span>
+
+      {icon ? (
+        <div
+          ref={iconRef}
+          className={cn("flex h-10 w-10 shrink-0 items-center justify-center rounded-xl will-change-transform", a.iconBg, a.iconText)}
         >
+          {icon}
+        </div>
+      ) : null}
+
+      <span className="flex-1 text-xl font-bold tracking-tight text-white/85 sm:text-2xl">{label}</span>
+
+      <div ref={arrowRef} className="shrink-0 text-white/35 will-change-transform" style={{ opacity: 0, transform: "translateX(-12px)" }}>
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
           <path d="M5 12h14M12 5l7 7-7 7" />
         </svg>
+      </div>
 
-        <span className="absolute bottom-0 left-6 right-6 h-px bg-gradient-to-r from-white/[0.04] via-white/[0.08] to-white/[0.04]" />
-      </Link>
-    );
-  },
-);
-
-NavLink.displayName = "NavLink";
+      <span ref={lineRef} className={cn("absolute bottom-0 left-16 right-4 h-px origin-left", a.line)} style={{ transform: "scaleX(0)" }} />
+      <span className="absolute bottom-0 left-16 right-4 h-px bg-white/[0.04]" />
+    </Link>
+  );
+}
