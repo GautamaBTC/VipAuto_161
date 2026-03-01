@@ -1,54 +1,55 @@
 "use client";
 
 import { useEffect, useRef } from "react";
+import { gsap } from "gsap";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { useReducedMotion } from "@/hooks/useReducedMotion";
 
 type ReverseParallaxBackgroundProps = {
-  speed?: number;
-  maxOffset?: number;
+  speed?: number; // positive value means upward shift on scroll down
 };
 
 export function ReverseParallaxBackground({
-  speed = 0.12,
-  maxOffset = 90,
+  speed = 0.16,
 }: ReverseParallaxBackgroundProps) {
-  const ref = useRef<HTMLDivElement>(null);
+  const wrapRef = useRef<HTMLDivElement>(null);
+  const layerRef = useRef<HTMLDivElement>(null);
   const reduced = useReducedMotion();
 
   useEffect(() => {
-    const node = ref.current;
-    if (!node || reduced) return;
+    const wrap = wrapRef.current;
+    const layer = layerRef.current;
+    if (!wrap || !layer || reduced) return;
 
-    let raf = 0;
-    const update = () => {
-      const rect = node.getBoundingClientRect();
-      const offset = Math.max(0, Math.min(maxOffset, -rect.top * speed));
-      node.style.transform = `translate3d(0, ${offset}px, 0)`;
-    };
+    gsap.registerPlugin(ScrollTrigger);
 
-    const requestUpdate = () => {
-      window.cancelAnimationFrame(raf);
-      raf = window.requestAnimationFrame(update);
-    };
-
-    update();
-    window.addEventListener("scroll", requestUpdate, { passive: true });
-    window.addEventListener("resize", requestUpdate);
+    const tween = gsap.to(layer, {
+      yPercent: -Math.abs(speed) * 28,
+      ease: "none",
+      scrollTrigger: {
+        trigger: wrap,
+        start: "top bottom",
+        end: "bottom top",
+        scrub: 1,
+        invalidateOnRefresh: true,
+      },
+    });
 
     return () => {
-      window.cancelAnimationFrame(raf);
-      window.removeEventListener("scroll", requestUpdate);
-      window.removeEventListener("resize", requestUpdate);
+      tween.scrollTrigger?.kill();
+      tween.kill();
     };
-  }, [maxOffset, reduced, speed]);
+  }, [reduced, speed]);
 
   return (
-    <div ref={ref} className="pointer-events-none absolute inset-0 will-change-transform" aria-hidden>
+    <div ref={wrapRef} className="pointer-events-none absolute inset-0 overflow-hidden" aria-hidden>
       <div
+        ref={layerRef}
         className="absolute inset-[-12%]"
         style={{
           background:
             "radial-gradient(600px 240px at 15% 20%, rgba(255,95,46,0.14), transparent 72%), radial-gradient(700px 300px at 85% 10%, rgba(215,23,23,0.16), transparent 74%), linear-gradient(180deg, rgba(255,255,255,0.02) 0%, transparent 100%)",
+          willChange: "transform",
         }}
       />
     </div>
