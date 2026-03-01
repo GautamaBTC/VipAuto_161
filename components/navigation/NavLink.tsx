@@ -15,34 +15,6 @@ type NavLinkProps = {
   onClick?: () => void;
 };
 
-const accentStyles: Record<NonNullable<NavLinkProps["accentColor"]>, { iconBg: string; iconText: string; line: string }> = {
-  purple: {
-    iconBg: "bg-[var(--accent)]/10",
-    iconText: "text-[var(--accent)]",
-    line: "bg-[var(--accent)]/35",
-  },
-  teal: {
-    iconBg: "bg-[var(--accent-2)]/12",
-    iconText: "text-[var(--accent-2)]",
-    line: "bg-[var(--accent-2)]/35",
-  },
-  green: {
-    iconBg: "bg-[#00b894]/12",
-    iconText: "text-[#00b894]",
-    line: "bg-[#00b894]/35",
-  },
-  pink: {
-    iconBg: "bg-[#f472b6]/12",
-    iconText: "text-[#f472b6]",
-    line: "bg-[#f472b6]/35",
-  },
-  gold: {
-    iconBg: "bg-[#fbbf24]/12",
-    iconText: "text-[#fbbf24]",
-    line: "bg-[#fbbf24]/35",
-  },
-};
-
 export function NavLink({ href, label, icon, index, direction = "left", accentColor = "purple", onClick }: NavLinkProps) {
   const iconRef = useRef<HTMLDivElement>(null);
   const arrowRef = useRef<HTMLDivElement>(null);
@@ -88,7 +60,8 @@ export function NavLink({ href, label, icon, index, direction = "left", accentCo
     });
   }, []);
 
-  const a = accentStyles[accentColor];
+  void index;
+  void accentColor;
 
   return (
     <Link
@@ -104,12 +77,13 @@ export function NavLink({ href, label, icon, index, direction = "left", accentCo
         "focus-visible:rounded-xl focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[var(--accent)]/40",
       )}
     >
-      <span className="w-5 shrink-0 font-mono text-[11px] tabular-nums text-white/20">{String(index + 1).padStart(2, "0")}</span>
-
       {icon ? (
         <div
           ref={iconRef}
-          className={cn("flex h-10 w-10 shrink-0 items-center justify-center rounded-xl will-change-transform", a.iconBg, a.iconText)}
+          className={cn(
+            "flex h-10 w-10 shrink-0 items-center justify-center rounded-xl will-change-transform",
+            "bg-[var(--accent)]/15 text-[var(--accent)]",
+          )}
         >
           {icon}
         </div>
@@ -123,8 +97,8 @@ export function NavLink({ href, label, icon, index, direction = "left", accentCo
         </svg>
       </div>
 
-      <span ref={lineRef} className={cn("absolute bottom-0 left-16 right-4 h-px origin-left", a.line)} style={{ transform: "scaleX(0)" }} />
-      <span className="absolute bottom-0 left-16 right-4 h-px bg-white/[0.04]" />
+      <span ref={lineRef} className="absolute bottom-0 left-4 right-4 h-px origin-left bg-[var(--accent)]/35" style={{ transform: "scaleX(0)" }} />
+      <span className="absolute bottom-0 left-4 right-4 h-px bg-white/[0.04]" />
     </Link>
   );
 }

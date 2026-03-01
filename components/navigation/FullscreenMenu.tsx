@@ -212,8 +212,8 @@ export function FullscreenMenu({ isOpen, onClose, children }: FullscreenMenuProp
           </div>
         </div>
 
-        <nav ref={navRef} className="menu-scroll relative z-10 flex-1 overflow-y-auto px-4 sm:px-5" role="navigation">
-          <div className="flex flex-col gap-1">{children}</div>
+        <nav ref={navRef} className="relative z-10 flex-1 overflow-hidden px-4 sm:px-5" role="navigation">
+          <div className="flex h-full flex-col justify-center gap-1">{children}</div>
         </nav>
 
         <div ref={footerRef} className="relative z-10 mt-auto border-t border-white/10 px-6 pb-8 pt-6">
