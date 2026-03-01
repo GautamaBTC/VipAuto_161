@@ -4,6 +4,7 @@ import { Reveal } from "@/components/effects/Reveal";
 import { Footer } from "@/components/layout/Footer";
 import { Header } from "@/components/layout/Header";
 import { ScrollProgress } from "@/components/layout/ScrollProgress";
+import Multimeter from "@/components/multimeter/Multimeter";
 import { AdvantagesSection } from "@/components/sections/AdvantagesSection";
 import { BrandsSection } from "@/components/sections/BrandsSection";
 import { CompareSection } from "@/components/sections/CompareSection";
@@ -107,6 +108,7 @@ export default function Home() {
         <Reveal>
           <ContactSection />
         </Reveal>
+        <Multimeter autoAnimate animationInterval={3000} />
       </main>
       <StickyMobileActions />
       <Footer />
