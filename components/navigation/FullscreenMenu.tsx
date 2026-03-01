@@ -88,8 +88,8 @@ export function FullscreenMenu({ isOpen, onClose, children }: FullscreenMenuProp
       },
       0.1,
     );
-    tl.to(closeLineA, { width: 28, duration: 0.35 }, 0.15);
-    tl.to(closeLineB, { width: 20, duration: 0.32 }, 0.18);
+    tl.to(closeLineA, { width: 24, duration: 0.35 }, 0.15);
+    tl.to(closeLineB, { width: 24, duration: 0.35 }, 0.18);
     tl.to(
       navItems,
       {
@@ -173,6 +173,17 @@ export function FullscreenMenu({ isOpen, onClose, children }: FullscreenMenuProp
         aria-hidden="true"
       />
 
+      <button
+        ref={closeWrapRef}
+        type="button"
+        onClick={onClose}
+        aria-label="Закрыть меню"
+        className="fixed right-5 top-2 z-[10002] flex h-11 w-11 items-center justify-center sm:right-6 sm:top-3"
+      >
+        <span ref={closeLineARef} className="absolute h-[2px] -rotate-45 rounded-full bg-white" />
+        <span ref={closeLineBRef} className="absolute h-[2px] rotate-45 rounded-full bg-white" />
+      </button>
+
       <aside
         ref={panelRef}
         className={cn(
@@ -194,30 +205,11 @@ export function FullscreenMenu({ isOpen, onClose, children }: FullscreenMenuProp
           className="pointer-events-none absolute -right-24 bottom-24 h-64 w-64 rounded-full bg-[var(--accent-2)]/18 blur-[96px]"
         />
 
-        <div className="relative z-10 flex items-center justify-between px-6 pb-6 pt-20 sm:pt-24">
+        <div className="relative z-10 flex items-center justify-between px-6 pb-6 pt-14 sm:pt-16">
           <div>
             <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-white/30">Навигация</p>
             <div className="mt-2 h-px w-12 bg-gradient-to-r from-[var(--accent)] to-transparent" />
           </div>
-
-          <button
-            ref={closeWrapRef}
-            type="button"
-            onClick={onClose}
-            aria-label="Закрыть меню"
-            className="relative flex h-11 w-11 items-center justify-center rounded-xl border border-white/15 bg-white/5"
-          >
-            <span
-              ref={closeLineARef}
-              className="absolute h-[1.5px] -rotate-45 rounded-full bg-white/90"
-              style={{ transform: "translateX(2px) rotate(-45deg)" }}
-            />
-            <span
-              ref={closeLineBRef}
-              className="absolute h-[2px] rotate-45 rounded-full bg-[var(--accent-2)]"
-              style={{ transform: "translateX(-3px) translateY(1px) rotate(45deg)" }}
-            />
-          </button>
         </div>
 
         <nav ref={navRef} className="menu-scroll relative z-10 flex-1 overflow-y-auto px-4 sm:px-5" role="navigation">
