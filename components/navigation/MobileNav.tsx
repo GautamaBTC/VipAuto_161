@@ -23,7 +23,7 @@ export function MobileNav() {
 
   return (
     <>
-      <BurgerButton isOpen={isOpen} onToggle={toggle} />
+      <BurgerButton isOpen={isOpen} onToggle={toggle} className="fixed right-5 top-5 sm:right-6 sm:top-6" />
 
       <FullscreenMenu isOpen={isOpen} onClose={close}>
         {navItems.map((item, index) => (

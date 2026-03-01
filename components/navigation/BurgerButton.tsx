@@ -11,27 +11,62 @@ type BurgerButtonProps = {
 };
 
 export function BurgerButton({ isOpen, onToggle, className }: BurgerButtonProps) {
-  const topRef = useRef<HTMLSpanElement>(null);
-  const midRef = useRef<HTMLSpanElement>(null);
-  const botRef = useRef<HTMLSpanElement>(null);
+  const buttonRef = useRef<HTMLButtonElement>(null);
+  const line1Ref = useRef<HTMLSpanElement>(null);
+  const line2Ref = useRef<HTMLSpanElement>(null);
+  const line3Ref = useRef<HTMLSpanElement>(null);
   const tlRef = useRef<gsap.core.Timeline | null>(null);
 
   useEffect(() => {
-    const top = topRef.current;
-    const mid = midRef.current;
-    const bot = botRef.current;
-    if (!top || !mid || !bot) return;
+    const btn = buttonRef.current;
+    if (!btn) return;
 
-    const tl = gsap.timeline({
-      paused: true,
-      defaults: { duration: 0.4, ease: "power2.inOut" },
-    });
+    const handleMouseMove = (event: MouseEvent) => {
+      const rect = btn.getBoundingClientRect();
+      const x = event.clientX - (rect.left + rect.width / 2);
+      const y = event.clientY - (rect.top + rect.height / 2);
 
-    tl.to(mid, { scaleX: 0, autoAlpha: 0, duration: 0.2 }, 0)
-      .to(top, { top: "50%", yPercent: -50, duration: 0.3 }, 0)
-      .to(bot, { top: "50%", yPercent: -50, duration: 0.3 }, 0)
+      gsap.to(btn, {
+        x: x * 0.3,
+        y: y * 0.3,
+        duration: 0.3,
+        ease: "power2.out",
+      });
+    };
+
+    const handleMouseLeave = () => {
+      gsap.to(btn, {
+        x: 0,
+        y: 0,
+        duration: 0.7,
+        ease: "elastic.out(1, 0.3)",
+      });
+    };
+
+    btn.addEventListener("mousemove", handleMouseMove);
+    btn.addEventListener("mouseleave", handleMouseLeave);
+
+    return () => {
+      btn.removeEventListener("mousemove", handleMouseMove);
+      btn.removeEventListener("mouseleave", handleMouseLeave);
+    };
+  }, []);
+
+  useEffect(() => {
+    const l1 = line1Ref.current;
+    const l2 = line2Ref.current;
+    const l3 = line3Ref.current;
+    const btn = buttonRef.current;
+    if (!l1 || !l2 || !l3 || !btn) return;
+
+    gsap.set([l1, l2, l3], { transformOrigin: "50% 50%" });
+
+    const tl = gsap.timeline({ paused: true, defaults: { ease: "power2.inOut" } });
+
+    tl.to([l1, l3], { top: "50%", y: 0, marginTop: -1, scaleY: 0.3, duration: 0.25, ease: "back.in(2)" }, 0)
+      .to(l2, { scale: 0, opacity: 0, duration: 0.2 }, 0)
       .to(
-        top,
+        l1,
         {
           rotation: 45,
           width: "32px",
@@ -42,7 +77,7 @@ export function BurgerButton({ isOpen, onToggle, className }: BurgerButtonProps)
         0.2,
       )
       .to(
-        bot,
+        l3,
         {
           rotation: -45,
           width: "18px",
@@ -52,6 +87,28 @@ export function BurgerButton({ isOpen, onToggle, className }: BurgerButtonProps)
           ease: "back.out(1.7)",
         },
         0.2,
+      )
+      .to(
+        btn,
+        {
+          scale: 1.1,
+          boxShadow: "0 0 25px rgba(255, 255, 255, 0.4), inset 0 0 10px rgba(255,255,255,0.1)",
+          borderColor: "rgba(255,255,255,0.3)",
+          duration: 0.2,
+          yoyo: true,
+          repeat: 1,
+          ease: "sine.inOut",
+        },
+        0.35,
+      )
+      .to(
+        btn,
+        {
+          boxShadow: "0 0 15px rgba(255, 255, 255, 0.15)",
+          scale: 1.05,
+          duration: 0.3,
+        },
+        0.55,
       );
 
     tlRef.current = tl;
@@ -70,42 +127,45 @@ export function BurgerButton({ isOpen, onToggle, className }: BurgerButtonProps)
 
   const handleMouseEnter = () => {
     if (isOpen) return;
-    gsap.to(topRef.current, { width: "100%", duration: 0.3, ease: "power2.out" });
-    gsap.to(midRef.current, { width: "100%", x: 0, duration: 0.3, delay: 0.05, ease: "power2.out" });
-    gsap.to(botRef.current, { width: "100%", duration: 0.3, delay: 0.1, ease: "power2.out" });
+    gsap.to(line1Ref.current, { width: "100%", duration: 0.3, ease: "power2.out" });
+    gsap.to(line2Ref.current, { width: "100%", x: 0, duration: 0.3, delay: 0.05, ease: "power2.out" });
+    gsap.to(line3Ref.current, { width: "100%", duration: 0.3, delay: 0.1, ease: "power2.out" });
   };
 
   const handleMouseLeave = () => {
     if (isOpen) return;
-    gsap.to(topRef.current, { width: "24px", duration: 0.3, ease: "power2.out" });
-    gsap.to(midRef.current, { width: "32px", duration: 0.3, ease: "power2.out" });
-    gsap.to(botRef.current, { width: "18px", duration: 0.3, ease: "power2.out" });
+    gsap.to(line1Ref.current, { width: "24px", duration: 0.3, ease: "power2.out" });
+    gsap.to(line2Ref.current, { width: "32px", duration: 0.3, ease: "power2.out" });
+    gsap.to(line3Ref.current, { width: "18px", duration: 0.3, ease: "power2.out" });
   };
 
   return (
     <button
+      ref={buttonRef}
       onClick={onToggle}
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
       className={cn(
-        "group relative z-[10001] flex h-12 w-12 items-center justify-center rounded-full transition-colors hover:bg-white/5",
+        "relative z-[10000] flex h-12 w-12 items-center justify-center rounded-full",
+        "border border-white/10 bg-white/5 backdrop-blur-xl transition-colors hover:bg-white/10",
+        "shadow-[0_4px_10px_rgba(0,0,0,0.1)]",
         className,
       )}
       aria-label={isOpen ? "Закрыть меню" : "Открыть меню"}
       aria-expanded={isOpen}
     >
-      <div className="relative h-[24px] w-[32px]">
+      <div className="relative h-[16px] w-[24px]">
         <span
-          ref={topRef}
-          className="absolute right-0 top-0 block h-[2px] w-[24px] rounded-full bg-white will-change-transform"
+          ref={line1Ref}
+          className="absolute left-0 top-0 block h-[2px] w-full origin-center rounded-full bg-gradient-to-r from-white to-[#e0e7ff] shadow-[0_0_8px_rgba(255,255,255,0.2)]"
         />
         <span
-          ref={midRef}
-          className="absolute right-0 top-[11px] block h-[2px] w-[32px] rounded-full bg-white will-change-transform"
+          ref={line2Ref}
+          className="absolute left-0 top-1/2 mt-[-1px] block h-[2px] w-full origin-center rounded-full bg-gradient-to-r from-white to-[#e0e7ff] opacity-80"
         />
         <span
-          ref={botRef}
-          className="absolute bottom-0 right-0 block h-[2px] w-[18px] rounded-full bg-white will-change-transform"
+          ref={line3Ref}
+          className="absolute left-0 top-[14px] block h-[2px] w-full origin-center rounded-full bg-gradient-to-r from-white to-[#e0e7ff] shadow-[0_0_8px_rgba(255,255,255,0.2)]"
         />
       </div>
     </button>
