@@ -134,14 +134,14 @@ export function FullscreenMenu({ isOpen, onClose, children }: FullscreenMenuProp
 
         <div className="flex items-center justify-between px-6 pb-6 pt-20 sm:pt-24">
           <div>
-            <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-white/20">Menu</p>
+            <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-white/20">Навигация</p>
             <div className="mt-2 h-px w-8 bg-gradient-to-r from-[var(--accent)] to-transparent" />
           </div>
           <button
             onClick={onClose}
             className="flex items-center gap-2 rounded-xl px-3 py-1.5 text-[11px] font-medium tracking-wider text-white/30 transition-colors duration-300 hover:text-white/60"
           >
-            close
+            закрыть
             <kbd className="rounded bg-white/[0.06] px-1.5 py-0.5 text-[10px]">esc</kbd>
           </button>
         </div>
@@ -182,7 +182,7 @@ export function FullscreenMenu({ isOpen, onClose, children }: FullscreenMenuProp
             data-footer-el
             className="group/cta flex w-full items-center justify-center gap-2 rounded-2xl bg-[#00b894] px-6 py-4 text-sm font-bold text-[var(--bg-primary)] transition-all duration-300 hover:bg-[#00b894]/90 hover:shadow-[0_0_40px_rgba(0,184,148,0.2)] active:scale-[0.97]"
           >
-            Book diagnostics
+            Записаться на диагностику
             <ArrowUpRight className="h-4 w-4 transition-transform duration-300 group-hover/cta:translate-x-0.5 group-hover/cta:-translate-y-0.5" />
           </a>
         </div>

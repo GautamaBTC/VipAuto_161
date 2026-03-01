@@ -72,7 +72,7 @@ export const BurgerButton = forwardRef<BurgerButtonHandle, BurgerButtonProps>(({
       onClick={onToggle}
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
-      aria-label={isOpen ? "Close menu" : "Open menu"}
+      aria-label={isOpen ? "Закрыть меню" : "Открыть меню"}
       aria-expanded={isOpen}
       className={cn(
         "relative z-[200] flex h-12 w-12 items-center justify-center",
