@@ -117,14 +117,14 @@ export function FullscreenMenu({ isOpen, onClose, children }: FullscreenMenuProp
   }, [isOpen, onClose]);
 
   return (
-    <div ref={overlayRef} className="fixed inset-0 z-[100]" style={{ visibility: "hidden", opacity: 0 }}>
-      <div className="absolute inset-0 bg-black/60 backdrop-blur-md" onClick={onClose} aria-hidden="true" />
+    <div ref={overlayRef} className="fixed inset-0 z-[500]" style={{ visibility: "hidden", opacity: 0 }}>
+      <div className="absolute inset-0 bg-black/82 backdrop-blur-xl" onClick={onClose} aria-hidden="true" />
 
       <aside
         ref={panelRef}
         className={cn(
           "absolute right-0 top-0 flex h-full w-full flex-col",
-          "bg-[#08081a] sm:w-[440px] sm:border-l sm:border-white/10 sm:bg-[#08081a]/95 sm:backdrop-blur-2xl",
+          "bg-[linear-gradient(180deg,#06060d_0%,#080913_45%,#090b16_100%)] sm:w-[440px] sm:border-l sm:border-white/12 sm:backdrop-blur-2xl",
         )}
         role="dialog"
         aria-modal="true"
