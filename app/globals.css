@@ -81,6 +81,96 @@ select:focus-visible {
   box-shadow: 0 0 22px var(--accent-glow);
 }
 
+.glass-card {
+  position: relative;
+  overflow: hidden;
+  border-radius: 24px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.03);
+  backdrop-filter: blur(20px);
+  transition: all 400ms ease;
+  cursor: default;
+}
+
+.glass-card:hover {
+  background: rgba(255, 255, 255, 0.06);
+  border-color: rgba(255, 255, 255, 0.12);
+  box-shadow:
+    0 20px 60px -20px rgba(0, 0, 0, 0.5),
+    0 0 0 1px rgba(255, 255, 255, 0.05);
+}
+
+.glow-line {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  height: 2px;
+  width: 0;
+  border-bottom-left-radius: 999px;
+  border-bottom-right-radius: 999px;
+  transition: width 500ms ease-out;
+}
+
+.glass-card:hover .glow-line {
+  width: 60%;
+}
+
+.corner-glow {
+  position: absolute;
+  top: -40px;
+  right: -40px;
+  height: 120px;
+  width: 120px;
+  border-radius: 999px;
+  opacity: 0;
+  filter: blur(40px);
+  pointer-events: none;
+  transition: opacity 500ms ease;
+}
+
+.glass-card:hover .corner-glow {
+  opacity: 1;
+}
+
+@keyframes badge-pulse {
+  0%,
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.4;
+    transform: scale(0.8);
+  }
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}
+
+.animate-badge-pulse {
+  animation: badge-pulse 2s ease-in-out infinite;
+}
+
+.shimmer-text {
+  background: linear-gradient(90deg, #f0f0f0 0%, #ffffff 50%, #f0f0f0 100%);
+  background-size: 200% 100%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  animation: shimmer 1.8s ease-out forwards;
+}
+
+.duration-400 {
+  transition-duration: 400ms;
+}
+
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,
