@@ -222,12 +222,28 @@ select:focus-visible {
   }
 }
 
+@keyframes parallax-twinkle {
+  0%,
+  100% {
+    opacity: var(--tw-opacity, 1);
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.05;
+    transform: scale(0.5);
+  }
+}
+
 .animate-float-slow {
   animation: float-slow 4s ease-in-out infinite;
 }
 
 .animate-pulse-ring {
   animation: pulse-ring 2s ease-out infinite;
+}
+
+.animate-parallax-twinkle {
+  animation: parallax-twinkle 3s ease-in-out infinite;
 }
 
 @media (prefers-reduced-motion: reduce) {
