@@ -1,45 +1,49 @@
 "use client";
 
 import { useEffect, useRef } from "react";
-import { gsap } from "gsap";
-import { ScrollTrigger } from "gsap/ScrollTrigger";
-import { useReducedMotion } from "@/hooks/useReducedMotion";
 
 type ReverseParallaxBackgroundProps = {
-  speed?: number; // positive value means upward shift on scroll down
+  speed?: number;
+  maxOffset?: number;
 };
 
 export function ReverseParallaxBackground({
-  speed = 0.16,
+  speed = 0.2,
+  maxOffset = 140,
 }: ReverseParallaxBackgroundProps) {
   const wrapRef = useRef<HTMLDivElement>(null);
   const layerRef = useRef<HTMLDivElement>(null);
-  const reduced = useReducedMotion();
 
   useEffect(() => {
     const wrap = wrapRef.current;
     const layer = layerRef.current;
-    if (!wrap || !layer || reduced) return;
+    if (!wrap || !layer) return;
 
-    gsap.registerPlugin(ScrollTrigger);
+    const hostSection = wrap.closest("section");
+    if (!hostSection) return;
 
-    const tween = gsap.to(layer, {
-      yPercent: -Math.abs(speed) * 28,
-      ease: "none",
-      scrollTrigger: {
-        trigger: wrap,
-        start: "top bottom",
-        end: "bottom top",
-        scrub: 1,
-        invalidateOnRefresh: true,
-      },
-    });
+    let raf = 0;
+    const update = () => {
+      const rect = hostSection.getBoundingClientRect();
+      const offset = Math.max(-maxOffset, Math.min(maxOffset, -rect.top * speed));
+      layer.style.transform = `translate3d(0, ${offset}px, 0)`;
+    };
+
+    const onScroll = () => {
+      window.cancelAnimationFrame(raf);
+      raf = window.requestAnimationFrame(update);
+    };
+
+    update();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    window.addEventListener("resize", onScroll);
 
     return () => {
-      tween.scrollTrigger?.kill();
-      tween.kill();
+      window.cancelAnimationFrame(raf);
+      window.removeEventListener("scroll", onScroll);
+      window.removeEventListener("resize", onScroll);
     };
-  }, [reduced, speed]);
+  }, [maxOffset, speed]);
 
   return (
     <div ref={wrapRef} className="pointer-events-none absolute inset-0 overflow-hidden" aria-hidden>
