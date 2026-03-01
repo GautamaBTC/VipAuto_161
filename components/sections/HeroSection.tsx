@@ -10,7 +10,8 @@ export function HeroSection() {
       <div className="container-shell">
         <div className="card-surface relative overflow-hidden p-7 sm:p-10">
           <ReverseParallaxBackground />
-          <div className="relative grid gap-7 lg:grid-cols-[1.1fr_0.9fr] lg:items-center">
+          <Voltmeter autoAnimate animationInterval={3000} opacity={1} />
+          <div className="relative grid gap-7 lg:items-center">
             <div>
               <p className="text-xs uppercase tracking-[0.2em] text-[var(--text-secondary)]">
                 <span className="accent-dot" />
@@ -48,7 +49,6 @@ export function HeroSection() {
                 </Magnetic>
               </div>
             </div>
-            <Voltmeter />
           </div>
         </div>
       </div>

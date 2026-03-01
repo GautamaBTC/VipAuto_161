@@ -1,121 +1,218 @@
 ﻿"use client";
 
-import type { FC } from "react";
+import { type FC, useMemo } from "react";
 import { cn } from "@/lib/cn";
-import type { VoltmeterProps } from "./voltmeter.types";
-import { SIZE_CONFIG } from "./voltmeter.constants";
-import { useVoltmeter } from "./useVoltmeter";
-import { VoltmeterMiniChart } from "./VoltmeterMiniChart";
-import { VoltmeterParticles } from "./VoltmeterParticles";
-import { VoltmeterRing } from "./VoltmeterRing";
-import { VoltmeterValue } from "./VoltmeterValue";
 
-function hexToRgba(hex: string, alpha: number): string {
-  const clean = hex.replace("#", "");
-  const bigint = Number.parseInt(clean, 16);
-  const r = (bigint >> 16) & 255;
-  const g = (bigint >> 8) & 255;
-  const b = bigint & 255;
-  return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+import type { VoltmeterProps } from "./voltmeter.types";
+import {
+  ARC_LEN,
+  CIRCUMFERENCE,
+  CX,
+  CY,
+  R,
+  START_DEG,
+  STROKE,
+  SWEEP_DEG,
+  VB,
+  V_MAX,
+  ZONES,
+} from "./voltmeter.constants";
+import { useVoltmeter } from "./useVoltmeter";
+
+function Ticks() {
+  const ticks = useMemo(() => {
+    const out: Array<{ x1: number; y1: number; x2: number; y2: number; major: boolean }> = [];
+    for (let v = 0; v <= V_MAX; v += 1) {
+      const major = v % 5 === 0;
+      const frac = v / V_MAX;
+      const deg = START_DEG + frac * SWEEP_DEG;
+      const rad = (deg * Math.PI) / 180;
+      const inner = major ? R - 16 : R - 8;
+      const outer = R - 3;
+      out.push({
+        x1: CX + inner * Math.cos(rad),
+        y1: CY + inner * Math.sin(rad),
+        x2: CX + outer * Math.cos(rad),
+        y2: CY + outer * Math.sin(rad),
+        major,
+      });
+    }
+    return out;
+  }, []);
+
+  return (
+    <g>
+      {ticks.map((t, i) => (
+        <line
+          key={i}
+          x1={t.x1}
+          y1={t.y1}
+          x2={t.x2}
+          y2={t.y2}
+          stroke="white"
+          strokeWidth={t.major ? 1 : 0.4}
+          strokeLinecap="round"
+          opacity={t.major ? 0.12 : 0.05}
+        />
+      ))}
+    </g>
+  );
+}
+
+function ZoneMarkers() {
+  return (
+    <g>
+      {ZONES.map((z) => {
+        const startFrac = z.min / V_MAX;
+        const endFrac = z.max / V_MAX;
+        const len = (endFrac - startFrac) * ARC_LEN;
+        const offset = ARC_LEN - startFrac * ARC_LEN;
+
+        return (
+          <circle
+            key={z.min}
+            cx={CX}
+            cy={CY}
+            r={R + 8}
+            fill="none"
+            stroke={z.color}
+            strokeWidth={1}
+            strokeDasharray={`${len} ${CIRCUMFERENCE}`}
+            strokeDashoffset={offset}
+            strokeLinecap="butt"
+            opacity={0.07}
+            transform={`rotate(${START_DEG} ${CX} ${CY})`}
+          />
+        );
+      })}
+    </g>
+  );
 }
 
 export const Voltmeter: FC<VoltmeterProps> = ({
-  voltage,
+  voltage: extVoltage,
   autoAnimate = true,
   animationInterval = 2500,
-  size = "lg",
-  label = "Бортовое напряжение",
-  showChart = true,
+  opacity = 1,
   className,
   onVoltageChange,
 }) => {
-  const { state, valueRef, ringRef, glowRingRef, wrapRef } = useVoltmeter({
-    voltage,
+  const { voltage, zone, valueRef, ringRef, glowRef, dotRef } = useVoltmeter({
+    voltage: extVoltage,
     autoAnimate,
     animationInterval,
     onVoltageChange,
   });
 
-  const cfg = SIZE_CONFIG[size];
-  const zone = state.zone;
+  const initOffset = ARC_LEN - (voltage / V_MAX) * ARC_LEN;
+
+  const dotAngle = START_DEG + (voltage / V_MAX) * SWEEP_DEG;
+  const dotRad = (dotAngle * Math.PI) / 180;
+  const dotCx = CX + R * Math.cos(dotRad);
+  const dotCy = CY + R * Math.sin(dotRad);
 
   return (
-    <div ref={wrapRef} className={cn("relative flex select-none flex-col items-center", className)} style={{ width: cfg.container }}>
-      <div
-        className="relative w-full overflow-hidden rounded-3xl"
-        style={{
-          background: "rgba(255,255,255,0.02)",
-          backdropFilter: "blur(40px)",
-          WebkitBackdropFilter: "blur(40px)",
-          border: "1px solid rgba(255,255,255,0.05)",
-          boxShadow: "0 0 0 0.5px rgba(255,255,255,0.04), 0 40px 80px -20px rgba(0,0,0,0.6)",
-        }}
-      >
-        <div
-          className="pointer-events-none absolute -inset-1/2"
-          style={{
-            background: `radial-gradient(300px circle at 50% 30%, ${hexToRgba(zone.color, 0.08)} 0%, transparent 70%)`,
-            transition: "background 1s ease",
-          }}
-          aria-hidden
-        />
+    <div
+      className={cn("pointer-events-none absolute inset-0 flex items-center justify-center overflow-hidden", className)}
+      style={{ opacity }}
+      aria-hidden
+    >
+      <div className="relative aspect-square" style={{ width: "clamp(300px, 70vmin, 700px)" }}>
+        <svg viewBox={`0 0 ${VB} ${VB}`} className="absolute inset-0 h-full w-full">
+          <defs>
+            <filter id="vm-glow" x="-50%" y="-50%" width="200%" height="200%">
+              <feGaussianBlur stdDeviation="10" />
+            </filter>
+            <filter id="vm-dot-glow" x="-200%" y="-200%" width="500%" height="500%">
+              <feGaussianBlur stdDeviation="6" />
+            </filter>
+          </defs>
 
-        <VoltmeterParticles color={zone.color} count={20} />
+          <ZoneMarkers />
 
-        <div
-          className="absolute left-1/2 top-0 h-px w-24 -translate-x-1/2"
-          style={{
-            background: `linear-gradient(90deg, transparent, ${hexToRgba(zone.color, 0.6)}, transparent)`,
-            transition: "background 0.8s ease",
-          }}
-          aria-hidden
-        />
+          <circle
+            cx={CX}
+            cy={CY}
+            r={R}
+            fill="none"
+            stroke="white"
+            strokeWidth={STROKE}
+            strokeDasharray={`${ARC_LEN} ${CIRCUMFERENCE}`}
+            strokeLinecap="round"
+            opacity={0.04}
+            transform={`rotate(${START_DEG} ${CX} ${CY})`}
+          />
 
-        <div className="relative z-10 flex flex-col items-center px-6 pb-5 pt-5">
-          <div className="mb-3 flex w-full items-center justify-between">
-            <span className="text-[10px] font-medium uppercase tracking-[0.2em] text-white/25">{label}</span>
-            <div className="flex items-center gap-1.5">
-              <span className="h-1 w-1 rounded-full" style={{ backgroundColor: zone.color, boxShadow: `0 0 4px ${zone.color}` }} />
-              <span className="text-[9px] font-medium tracking-wider text-white/20">LIVE</span>
-            </div>
-          </div>
+          <Ticks />
 
-          <div className="relative" style={{ width: cfg.ring * 2, height: cfg.ring * 2 }}>
-            <VoltmeterRing voltage={state.voltage} zone={zone} ringRef={ringRef} glowRingRef={glowRingRef} />
-            <div className="absolute inset-0 flex items-center justify-center">
-              <VoltmeterValue ref={valueRef} voltage={state.voltage} zone={zone} trend={state.trend} delta={state.delta} />
-            </div>
-          </div>
+          <circle
+            ref={glowRef}
+            cx={CX}
+            cy={CY}
+            r={R}
+            fill="none"
+            stroke={zone.color}
+            strokeWidth={20}
+            strokeDasharray={`${ARC_LEN} ${CIRCUMFERENCE}`}
+            strokeDashoffset={initOffset}
+            strokeLinecap="round"
+            opacity={0.06}
+            filter="url(#vm-glow)"
+            transform={`rotate(${START_DEG} ${CX} ${CY})`}
+          />
 
-          <div
-            className="mt-2 flex items-center gap-2 rounded-full px-4 py-1.5"
+          <circle
+            ref={ringRef}
+            cx={CX}
+            cy={CY}
+            r={R}
+            fill="none"
+            stroke={zone.color}
+            strokeWidth={STROKE}
+            strokeDasharray={`${ARC_LEN} ${CIRCUMFERENCE}`}
+            strokeDashoffset={initOffset}
+            strokeLinecap="round"
+            opacity={0.35}
+            transform={`rotate(${START_DEG} ${CX} ${CY})`}
+          />
+
+          <circle cx={dotCx} cy={dotCy} r={12} fill={zone.color} opacity={0.12} filter="url(#vm-dot-glow)" />
+
+          <circle ref={dotRef} cx={dotCx} cy={dotCy} r={4} fill={zone.color} stroke={zone.color} strokeWidth={0} opacity={0.5} />
+        </svg>
+
+        <div className="absolute inset-0 flex flex-col items-center justify-center">
+          <span
+            ref={valueRef}
+            className="font-mono leading-none"
             style={{
-              background: hexToRgba(zone.color, 0.08),
-              border: `1px solid ${hexToRgba(zone.color, 0.2)}`,
-              transition: "all 0.6s ease",
+              fontSize: "clamp(3rem, 10vmin, 7rem)",
+              fontWeight: 200,
+              color: zone.color,
+              opacity: 0.12,
+              textShadow: `0 0 40px ${zone.color}26`,
+              transition: "color 1s ease, text-shadow 1s ease",
+              letterSpacing: "-0.02em",
             }}
           >
-            <span className="h-1.5 w-1.5 rounded-full" style={{ backgroundColor: zone.color, boxShadow: `0 0 6px ${hexToRgba(zone.color, 0.8)}` }} />
-            <span className="text-[11px] font-semibold tracking-[0.15em]" style={{ color: zone.color, textShadow: `0 0 10px ${hexToRgba(zone.color, 0.3)}` }}>
-              {zone.label}
-            </span>
-          </div>
+            {voltage.toFixed(1)}
+          </span>
 
-          {showChart && state.history.length >= 2 ? (
-            <div className="mt-4 w-full">
-              <VoltmeterMiniChart history={state.history} zone={zone} />
-            </div>
-          ) : null}
+          <span
+            className="font-mono leading-none"
+            style={{
+              fontSize: "clamp(0.75rem, 2vmin, 1.25rem)",
+              fontWeight: 300,
+              color: zone.color,
+              opacity: 0.06,
+              marginTop: "clamp(2px, 0.5vmin, 8px)",
+              letterSpacing: "0.3em",
+              transition: "color 1s ease",
+            }}
+          >
+            VOLTS
+          </span>
         </div>
-
-        <div
-          className="absolute bottom-0 left-1/2 h-px w-16 -translate-x-1/2"
-          style={{
-            background: `linear-gradient(90deg, transparent, ${hexToRgba(zone.color, 0.3)}, transparent)`,
-            transition: "background 0.8s ease",
-          }}
-          aria-hidden
-        />
       </div>
     </div>
   );
