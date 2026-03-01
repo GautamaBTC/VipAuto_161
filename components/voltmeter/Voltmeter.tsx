@@ -1,8 +1,9 @@
 "use client";
 
+import { useRef } from "react";
 import { useReducedMotion } from "@/hooks/useReducedMotion";
 import { cn } from "@/lib/cn";
-import { SIZE_MAP } from "@/components/voltmeter/voltmeter.constants";
+import { DEMO_VOLTAGES, SIZE_MAP } from "@/components/voltmeter/voltmeter.constants";
 import { VoltmeterArcBar } from "@/components/voltmeter/VoltmeterArcBar";
 import { VoltmeterSegmentDisplay } from "@/components/voltmeter/VoltmeterSegmentDisplay";
 import { VoltmeterSparkline } from "@/components/voltmeter/VoltmeterSparkline";
@@ -23,8 +24,9 @@ export function Voltmeter({
 }: VoltmeterProps) {
   const reduced = useReducedMotion();
   const dim = SIZE_MAP[size];
+  const tapIndexRef = useRef(0);
 
-  const { state, containerRef, glowRef } = useVoltmeter({
+  const { state, containerRef, glowRef, animateTo } = useVoltmeter({
     voltage,
     autoAnimate: reduced ? false : autoAnimate,
     animationInterval,
@@ -33,8 +35,27 @@ export function Voltmeter({
 
   const { zone } = state;
 
+  const allowTapUpdate = reduced || !autoAnimate;
+  const onTapUpdate = () => {
+    if (!allowTapUpdate || voltage !== undefined) return;
+    tapIndexRef.current = (tapIndexRef.current + 1) % DEMO_VOLTAGES.length;
+    const next = DEMO_VOLTAGES[tapIndexRef.current];
+    if (next !== undefined) animateTo(next);
+  };
+
   return (
-    <div ref={containerRef} className={cn("relative mx-auto w-full select-none", className)} style={{ maxWidth: dim.width }}>
+    <div
+      ref={containerRef}
+      className={cn("relative mx-auto w-full select-none", className)}
+      style={{ maxWidth: dim.width }}
+      onClick={onTapUpdate}
+      role={allowTapUpdate && voltage === undefined ? "button" : undefined}
+      tabIndex={allowTapUpdate && voltage === undefined ? 0 : undefined}
+      onKeyDown={(event) => {
+        if (event.key === "Enter" || event.key === " ") onTapUpdate();
+      }}
+      aria-label={allowTapUpdate && voltage === undefined ? "Обновить значение вольтметра" : undefined}
+    >
       <div
         className="relative w-full overflow-hidden rounded-2xl border border-white/10"
         style={{
@@ -113,7 +134,9 @@ export function Voltmeter({
 
         <div className="relative z-10 border-t border-white/10 px-4 py-2">
           <div className="flex items-center justify-between">
-            <span className="text-[9px] uppercase tracking-[0.15em] text-gray-600">АВТОЭЛЕКТРИК · ДИАГНОСТИКА</span>
+            <span className="text-[9px] uppercase tracking-[0.15em] text-gray-600">
+              {allowTapUpdate && voltage === undefined ? "ТАП: ОБНОВИТЬ" : "АВТОЭЛЕКТРИК · ДИАГНОСТИКА"}
+            </span>
             <span className="font-mono text-[9px] text-gray-600">v2.0</span>
           </div>
         </div>

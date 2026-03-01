@@ -37,7 +37,7 @@ export function useVoltmeter({
   onVoltageChange,
 }: UseVoltmeterOptions) {
   const [state, setState] = useState<VoltmeterState>(() => {
-    const initial = clampVoltage(externalVoltage ?? 0);
+    const initial = clampVoltage(externalVoltage ?? 13.6);
     return {
       voltage: initial,
       displayVoltage: initial,
