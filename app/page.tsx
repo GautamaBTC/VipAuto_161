@@ -1,4 +1,5 @@
 import { StickyMobileActions } from "@/components/effects/StickyMobileActions";
+import { Reveal } from "@/components/effects/Reveal";
 import { Footer } from "@/components/layout/Footer";
 import { Header } from "@/components/layout/Header";
 import { ScrollProgress } from "@/components/layout/ScrollProgress";
@@ -24,15 +25,33 @@ export default function Home() {
       <ScrollProgress />
       <Header />
       <main id="main-content">
-        <HeroSection />
-        <CompareSection />
-        <StatsSection />
-        <ServicesSection />
-        <AdvantagesSection />
-        <ProcessSection />
-        <BrandsSection />
-        <ReviewsSection />
-        <ContactSection />
+        <Reveal>
+          <HeroSection />
+        </Reveal>
+        <Reveal>
+          <CompareSection />
+        </Reveal>
+        <Reveal>
+          <StatsSection />
+        </Reveal>
+        <Reveal>
+          <ServicesSection />
+        </Reveal>
+        <Reveal>
+          <AdvantagesSection />
+        </Reveal>
+        <Reveal>
+          <ProcessSection />
+        </Reveal>
+        <Reveal>
+          <BrandsSection />
+        </Reveal>
+        <Reveal>
+          <ReviewsSection />
+        </Reveal>
+        <Reveal>
+          <ContactSection />
+        </Reveal>
       </main>
       <StickyMobileActions />
       <Footer />

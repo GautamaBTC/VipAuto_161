@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import Script from "next/script";
 import { JetBrains_Mono, Manrope } from "next/font/google";
 import { siteConfig } from "@/lib/siteConfig";
@@ -16,9 +16,16 @@ const jetBrainsMono = JetBrains_Mono({
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteConfig.siteUrl),
-  title: "VIPАвто - автоэлектрика и автоэлектроника в Шахтах",
+  title: {
+    default: "VIPАвто - автоэлектрика и автоэлектроника в Шахтах",
+    template: "%s | VIPАвто",
+  },
   description:
     "Профессиональная автоэлектрика в Шахтах: диагностика, StarLine, LED/Bi-LED, автозвук, камеры, кодирование блоков.",
+  alternates: {
+    canonical: "/",
+  },
+  category: "autos",
   keywords: [
     "автоэлектрика шахты",
     "автоэлектроника",
@@ -32,13 +39,31 @@ export const metadata: Metadata = {
     type: "website",
     locale: "ru_RU",
     url: siteConfig.siteUrl,
+    siteName: "VIPАвто",
   },
+  twitter: {
+    card: "summary_large_image",
+    title: "VIPАвто",
+    description: "Премиальная автоэлектрика и автоэлектроника в г. Шахты.",
+  },
+  robots: {
+    index: true,
+    follow: true,
+  },
+};
+
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  themeColor: "#d71717",
 };
 
 const localBusinessJsonLd = {
   "@context": "https://schema.org",
   "@type": "AutoRepair",
   name: siteConfig.brand,
+  image: `${siteConfig.siteUrl}/next.svg`,
+  priceRange: "₽₽",
   address: {
     "@type": "PostalAddress",
     streetAddress: siteConfig.address,
@@ -49,6 +74,20 @@ const localBusinessJsonLd = {
   telephone: siteConfig.phones[0],
   areaServed: "Ростовская область",
   url: siteConfig.siteUrl,
+  openingHoursSpecification: [
+    {
+      "@type": "OpeningHoursSpecification",
+      dayOfWeek: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"],
+      opens: "10:00",
+      closes: "20:00",
+    },
+  ],
+  aggregateRating: {
+    "@type": "AggregateRating",
+    ratingValue: siteConfig.rating,
+    reviewCount: siteConfig.ratingVotes,
+  },
+  sameAs: [siteConfig.social.telegram, siteConfig.social.whatsapp, siteConfig.social.vk],
 };
 
 export default function RootLayout({

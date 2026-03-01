@@ -55,30 +55,57 @@ export function LeadForm() {
   };
 
   return (
-    <form onSubmit={submit} className="space-y-3">
-      <label className="block">
+    <form onSubmit={submit} className="space-y-3" noValidate>
+      <label htmlFor="lead-name" className="block">
         <span className="mb-1 block text-sm text-[var(--text-secondary)]">Имя</span>
         <input
+          id="lead-name"
+          name="name"
+          autoComplete="name"
+          required
           value={name}
           onChange={(event) => setName(event.target.value)}
+          aria-invalid={Boolean(errors.name)}
+          aria-describedby={errors.name ? "lead-name-error" : undefined}
           className="h-12 w-full rounded-xl border border-white/20 bg-black/20 px-3"
           placeholder="Как к вам обращаться"
         />
-        {errors.name ? <span className="mt-1 block text-xs text-red-300">{errors.name}</span> : null}
+        {errors.name ? (
+          <span id="lead-name-error" className="mt-1 block text-xs text-red-300">
+            {errors.name}
+          </span>
+        ) : null}
       </label>
-      <label className="block">
+      <label htmlFor="lead-phone" className="block">
         <span className="mb-1 block text-sm text-[var(--text-secondary)]">Телефон</span>
         <input
+          id="lead-phone"
+          name="phone"
+          type="tel"
+          autoComplete="tel"
+          required
           value={phone}
           onChange={(event) => setPhone(event.target.value)}
+          aria-invalid={Boolean(errors.phone)}
+          aria-describedby={errors.phone ? "lead-phone-error" : undefined}
           className="h-12 w-full rounded-xl border border-white/20 bg-black/20 px-3"
           placeholder="+7 (___) ___-__-__"
         />
-        {errors.phone ? <span className="mt-1 block text-xs text-red-300">{errors.phone}</span> : null}
+        {errors.phone ? (
+          <span id="lead-phone-error" className="mt-1 block text-xs text-red-300">
+            {errors.phone}
+          </span>
+        ) : null}
       </label>
-      <label className="block">
+      <label htmlFor="lead-service" className="block">
         <span className="mb-1 block text-sm text-[var(--text-secondary)]">Услуга</span>
-        <select value={service} onChange={(event) => setService(event.target.value)} className="h-12 w-full rounded-xl border border-white/20 bg-black/20 px-3">
+        <select
+          id="lead-service"
+          name="service"
+          value={service}
+          onChange={(event) => setService(event.target.value)}
+          className="h-12 w-full rounded-xl border border-white/20 bg-black/20 px-3"
+        >
           {services.map((item) => (
             <option key={item.id} value={item.title}>
               {item.title}
@@ -86,9 +113,12 @@ export function LeadForm() {
           ))}
         </select>
       </label>
-      <label className="block">
+      <label htmlFor="lead-message" className="block">
         <span className="mb-1 block text-sm text-[var(--text-secondary)]">Комментарий</span>
         <textarea
+          id="lead-message"
+          name="message"
+          autoComplete="off"
           value={message}
           onChange={(event) => setMessage(event.target.value)}
           rows={4}
@@ -103,9 +133,13 @@ export function LeadForm() {
       >
         {formState === "loading" ? "Отправка..." : "Отправить заявку"}
       </button>
-      {formState === "success" ? <p className="text-sm text-green-300">Заявка отправлена. Мы свяжемся с вами.</p> : null}
+      {formState === "success" ? (
+        <p className="text-sm text-green-300" role="status" aria-live="polite">
+          Заявка отправлена. Мы свяжемся с вами.
+        </p>
+      ) : null}
       {formState === "error" ? (
-        <p className="text-sm text-yellow-300">
+        <p className="text-sm text-yellow-300" role="alert">
           Не удалось отправить автоматически. Напишите нам в{" "}
           <a href={siteConfig.social.whatsapp} className="underline">
             WhatsApp

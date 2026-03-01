@@ -4,6 +4,9 @@ import { siteConfig } from "@/lib/siteConfig";
 export const metadata: Metadata = {
   title: "Публичная оферта - VIPАвто",
   description: "Публичная оферта на оказание услуг автоэлектрики и автоэлектроники.",
+  alternates: {
+    canonical: "/terms",
+  },
 };
 
 const sections = [

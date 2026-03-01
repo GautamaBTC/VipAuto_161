@@ -4,6 +4,9 @@ import { siteConfig } from "@/lib/siteConfig";
 export const metadata: Metadata = {
   title: "Политика конфиденциальности - VIPАвто",
   description: "Порядок обработки персональных данных клиентов VIPАвто.",
+  alternates: {
+    canonical: "/privacy",
+  },
 };
 
 const sections = [

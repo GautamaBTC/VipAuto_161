@@ -1,3 +1,4 @@
+import { Magnetic } from "@/components/effects/Magnetic";
 import { ParticleField } from "@/components/effects/ParticleField";
 import { TypeWriter } from "@/components/effects/TypeWriter";
 import { Voltmeter } from "@/components/voltmeter/Voltmeter";
@@ -26,18 +27,22 @@ export function HeroSection() {
                 <TypeWriter words={["заряжаем ваш автомобиль", "делаем сложную электрику понятной", "работаем точно и аккуратно"]} />
               </p>
               <div className="mt-7 flex flex-wrap gap-3">
-                <a
-                  href={siteConfig.social.whatsapp}
-                  className="rounded-xl bg-[var(--accent)] px-5 py-3 font-semibold transition hover:brightness-110"
-                >
-                  Записаться в WhatsApp
-                </a>
-                <a
-                  href={siteConfig.social.telegram}
-                  className="rounded-xl border border-white/15 px-5 py-3 font-semibold text-[var(--text-secondary)] transition hover:text-[var(--text-primary)]"
-                >
-                  Написать в Telegram
-                </a>
+                <Magnetic>
+                  <a
+                    href={siteConfig.social.whatsapp}
+                    className="rounded-xl bg-[var(--accent)] px-5 py-3 font-semibold transition hover:brightness-110"
+                  >
+                    Записаться в WhatsApp
+                  </a>
+                </Magnetic>
+                <Magnetic>
+                  <a
+                    href={siteConfig.social.telegram}
+                    className="rounded-xl border border-white/15 px-5 py-3 font-semibold text-[var(--text-secondary)] transition hover:text-[var(--text-primary)]"
+                  >
+                    Написать в Telegram
+                  </a>
+                </Magnetic>
               </div>
             </div>
             <Voltmeter />
