@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef } from "react";
-import { ClipboardCheck, Crown, Handshake, ScanLine, Warehouse, Wrench, CircleDollarSign, Zap } from "lucide-react";
+import { ClipboardCheck, CircleDollarSign, Crown, Handshake, ScanLine, Warehouse, Wrench, Zap } from "lucide-react";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { useGSAP } from "@/hooks/useGSAP";
 import { useReducedMotion } from "@/hooks/useReducedMotion";
@@ -10,30 +10,30 @@ import { ComparisonItem } from "@/components/comparison/ComparisonItem";
 
 const garageItems = [
   {
-    icon: <Wrench className="h-5 w-5" />,
+    icon: <Wrench className="h-[18px] w-[18px] sm:h-5 sm:w-5" />,
     text: "Замена деталей без поиска первопричины",
   },
   {
-    icon: <CircleDollarSign className="h-5 w-5" />,
+    icon: <CircleDollarSign className="h-[18px] w-[18px] sm:h-5 sm:w-5" />,
     text: "Неясные сроки и стоимость по факту",
   },
   {
-    icon: <Zap className="h-5 w-5" />,
+    icon: <Zap className="h-[18px] w-[18px] sm:h-5 sm:w-5" />,
     text: "Нестабильный результат на сложной электрике",
   },
 ] as const;
 
 const vipItems = [
   {
-    icon: <ScanLine className="h-5 w-5" />,
+    icon: <ScanLine className="h-[18px] w-[18px] sm:h-5 sm:w-5" />,
     text: "Диагностика цепей и блоков под нагрузкой",
   },
   {
-    icon: <Handshake className="h-5 w-5" />,
+    icon: <Handshake className="h-[18px] w-[18px] sm:h-5 sm:w-5" />,
     text: "Прозрачное согласование до старта ремонта",
   },
   {
-    icon: <ClipboardCheck className="h-5 w-5" />,
+    icon: <ClipboardCheck className="h-[18px] w-[18px] sm:h-5 sm:w-5" />,
     text: "Контрольная проверка перед выдачей автомобиля",
   },
 ] as const;
@@ -44,123 +44,206 @@ export function ComparisonSection() {
   const sectionRef = useRef<HTMLElement>(null);
   const headerRef = useRef<HTMLDivElement>(null);
   const garageRef = useRef<HTMLDivElement>(null);
-  const dividerRef = useRef<HTMLDivElement>(null);
   const vipRef = useRef<HTMLDivElement>(null);
+  const vsRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
+    const section = sectionRef.current;
     const header = headerRef.current;
     const garage = garageRef.current;
-    const divider = dividerRef.current;
     const vip = vipRef.current;
-    if (!header || !garage || !vip) return;
-
-    const cards = [garage, divider, vip].filter(Boolean) as HTMLDivElement[];
+    const vs = vsRef.current;
+    if (!section || !header || !garage || !vip || !vs) return;
 
     if (reduced) {
-      gsap.set([header, ...cards], { autoAlpha: 1, y: 0, x: 0 });
+      gsap.set([header.children, garage, vip, vs], { autoAlpha: 1, y: 0, x: 0, scale: 1, rotation: 0 });
       return;
     }
 
-    const tweens: gsap.core.Tween[] = [];
+    const mm = gsap.matchMedia();
     const triggers: ScrollTrigger[] = [];
+    const tweens: gsap.core.Tween[] = [];
 
-    tweens.push(
-      gsap.from(header, {
-        autoAlpha: 0,
-        y: 30,
-        duration: 0.8,
-        ease: "expo.out",
-        scrollTrigger: {
-          trigger: header,
-          start: "top 85%",
-          once: true,
-        },
-      }),
-    );
-
-    cards.forEach((card, i) => {
-      gsap.set(card, { autoAlpha: 0, y: 40 });
-      const trigger = ScrollTrigger.create({
-        trigger: card,
+    const headerItems = Array.from(header.children);
+    gsap.set(headerItems, { autoAlpha: 0, y: 25 });
+    triggers.push(
+      ScrollTrigger.create({
+        trigger: header,
         start: "top 85%",
         once: true,
         onEnter: () => {
           tweens.push(
-            gsap.to(card, {
+            gsap.to(headerItems, {
               autoAlpha: 1,
               y: 0,
-              duration: 0.9,
-              delay: i * 0.15,
+              duration: 0.8,
+              stagger: 0.12,
               ease: "expo.out",
             }),
           );
         },
-      });
-      triggers.push(trigger);
-    });
+      }),
+    );
 
-    [garage, vip].forEach((card) => {
-      const items = card.querySelectorAll<HTMLElement>("[data-comparison-item]");
-      gsap.set(items, { autoAlpha: 0, x: -20 });
-      const trigger = ScrollTrigger.create({
-        trigger: card,
-        start: "top 75%",
+    mm.add(
+      {
+        isDesktop: "(min-width: 1024px)",
+        isMobile: "(max-width: 1023px)",
+      },
+      (ctx) => {
+        const { isDesktop } = ctx.conditions as { isDesktop: boolean };
+
+        gsap.set(garage, {
+          autoAlpha: 0,
+          x: isDesktop ? -60 : 0,
+          y: isDesktop ? 0 : 40,
+          scale: 0.97,
+        });
+        triggers.push(
+          ScrollTrigger.create({
+            trigger: garage,
+            start: "top 88%",
+            once: true,
+            onEnter: () => {
+              tweens.push(
+                gsap.to(garage, {
+                  autoAlpha: 1,
+                  x: 0,
+                  y: 0,
+                  scale: 1,
+                  duration: 1,
+                  ease: "expo.out",
+                }),
+              );
+
+              const items = garage.querySelectorAll<HTMLElement>("[data-comparison-item]");
+              if (items.length) {
+                gsap.set(items, { autoAlpha: 0, x: -30, scale: 0.95 });
+                tweens.push(
+                  gsap.to(items, {
+                    autoAlpha: 1,
+                    x: 0,
+                    scale: 1,
+                    duration: 0.6,
+                    stagger: 0.1,
+                    delay: 0.5,
+                    ease: "back.out(1.4)",
+                  }),
+                );
+              }
+            },
+          }),
+        );
+
+        gsap.set(vip, {
+          autoAlpha: 0,
+          x: isDesktop ? 60 : 0,
+          y: isDesktop ? 0 : 40,
+          scale: 0.97,
+        });
+        triggers.push(
+          ScrollTrigger.create({
+            trigger: vip,
+            start: "top 88%",
+            once: true,
+            onEnter: () => {
+              tweens.push(
+                gsap.to(vip, {
+                  autoAlpha: 1,
+                  x: 0,
+                  y: 0,
+                  scale: 1,
+                  duration: 1,
+                  delay: 0.15,
+                  ease: "expo.out",
+                }),
+              );
+
+              const items = vip.querySelectorAll<HTMLElement>("[data-comparison-item]");
+              if (items.length) {
+                gsap.set(items, { autoAlpha: 0, x: 30, scale: 0.95 });
+                tweens.push(
+                  gsap.to(items, {
+                    autoAlpha: 1,
+                    x: 0,
+                    scale: 1,
+                    duration: 0.6,
+                    stagger: 0.1,
+                    delay: 0.65,
+                    ease: "back.out(1.4)",
+                  }),
+                );
+              }
+            },
+          }),
+        );
+      },
+    );
+
+    gsap.set(vs, { autoAlpha: 0, scale: 0, rotation: -180 });
+    triggers.push(
+      ScrollTrigger.create({
+        trigger: vs,
+        start: "top 90%",
         once: true,
         onEnter: () => {
           tweens.push(
-            gsap.to(items, {
+            gsap.to(vs, {
               autoAlpha: 1,
-              x: 0,
-              duration: 0.6,
-              stagger: 0.12,
-              delay: 0.35,
-              ease: "power3.out",
+              scale: 1,
+              rotation: 0,
+              duration: 0.8,
+              delay: 0.4,
+              ease: "back.out(2)",
             }),
           );
         },
-      });
-      triggers.push(trigger);
-    });
+      }),
+    );
 
     return () => {
-      tweens.forEach((tween) => {
-        tween.scrollTrigger?.kill();
-        tween.kill();
-      });
+      mm.revert();
       triggers.forEach((trigger) => trigger.kill());
+      tweens.forEach((tween) => tween.kill());
     };
   }, [gsap, reduced]);
 
   return (
-    <section ref={sectionRef} id="compare" className="section-padding relative">
+    <section
+      ref={sectionRef}
+      id="compare"
+      className="relative mx-auto w-full max-w-[1200px] px-4 py-16 sm:px-6 sm:py-24 lg:py-28"
+    >
       <div
         aria-hidden
-        className="pointer-events-none absolute left-1/2 top-1/2 h-[500px] w-[700px] -translate-x-1/2 -translate-y-1/2 rounded-full blur-[100px]"
-        style={{
-          background: "radial-gradient(ellipse, rgba(255,95,46,0.08) 0%, rgba(215,23,23,0.06) 50%, transparent 72%)",
-        }}
+        className="pointer-events-none absolute left-1/3 top-1/2 h-[400px] w-[500px] -translate-x-1/2 -translate-y-1/2 rounded-full blur-[100px]"
+        style={{ background: "radial-gradient(ellipse, rgba(231,76,60,0.07) 0%, transparent 70%)" }}
+      />
+      <div
+        aria-hidden
+        className="pointer-events-none absolute right-1/3 top-1/2 h-[400px] w-[500px] translate-x-1/2 -translate-y-1/2 rounded-full blur-[100px]"
+        style={{ background: "radial-gradient(ellipse, rgba(0,184,148,0.09) 0%, transparent 70%)" }}
       />
 
-      <div className="container-shell relative z-10">
-        <div ref={headerRef} className="mb-14 text-center">
-          <div className="mb-5 inline-flex items-center gap-2 rounded-full border border-[var(--accent)]/30 bg-[var(--accent)]/15 px-5 py-2 text-[13px] font-semibold uppercase tracking-wider text-[var(--accent-2)]">
-            <span className="h-1.5 w-1.5 rounded-full bg-[var(--accent)] animate-badge-pulse" />
-            Сравнение
-          </div>
-
-          <h2 className="text-[clamp(26px,5vw,44px)] font-bold leading-tight tracking-tight text-gray-100">
-            Обычный гараж <span className="text-white/30">vs</span>{" "}
-            <span className="bg-gradient-to-br from-[var(--accent)] to-[var(--accent-2)] bg-clip-text text-transparent">
-              VIPАвто
-            </span>
-          </h2>
-
-          <p className="mx-auto mt-4 max-w-lg text-[15px] leading-relaxed text-white/45">
-            Наглядно показываем, чем профессиональный подход отличается от случайного ремонта.
-          </p>
+      <div ref={headerRef} className="relative z-10 mb-10 text-center sm:mb-14">
+        <div className="mb-5 inline-flex items-center gap-2 rounded-full border border-[var(--accent)]/30 bg-[var(--accent)]/15 px-5 py-2 text-[13px] font-semibold uppercase tracking-wider text-[var(--accent-2)]">
+          <span className="h-1.5 w-1.5 rounded-full bg-[var(--accent)] animate-badge-pulse" />
+          Сравнение
         </div>
 
-        <div className="grid items-stretch gap-5 lg:grid-cols-[1fr_auto_1fr]">
+        <h2 className="text-[clamp(24px,5vw,44px)] font-bold leading-tight tracking-tight text-gray-100">
+          <span className="text-[#e74c3c]/75">Обычный гараж</span>{" "}
+          <span className="mx-1 text-white/20 sm:mx-2">vs</span>{" "}
+          <span className="bg-gradient-to-br from-[#00b894] to-emerald-300 bg-clip-text text-transparent">VIPАвто</span>
+        </h2>
+
+        <p className="mx-auto mt-4 max-w-md text-sm leading-relaxed text-white/40 sm:text-[15px]">
+          Чем профессиональный подход отличается от привычного ремонта без диагностики.
+        </p>
+      </div>
+
+      <div className="relative z-10">
+        <div className="grid grid-cols-1 items-stretch gap-4 sm:gap-5 lg:grid-cols-[1fr_auto_1fr]">
           <ComparisonCard
             ref={garageRef}
             variant="garage"
@@ -169,24 +252,23 @@ export function ComparisonSection() {
             titleIcon={<Warehouse className="h-5 w-5" />}
           >
             {garageItems.map((item) => (
-              <div key={item.text} data-comparison-item>
-                <ComparisonItem icon={item.icon} text={item.text} variant="negative" />
-              </div>
+              <ComparisonItem key={item.text} icon={item.icon} text={item.text} variant="negative" />
             ))}
           </ComparisonCard>
 
-          <div ref={dividerRef} className="comparison-divider hidden lg:flex">
-            <div className="relative z-10 flex h-14 w-14 items-center justify-center rounded-2xl border border-white/10 bg-white/[0.03] backdrop-blur-xl">
-              <span className="text-lg font-bold tracking-tight text-white/35">vs</span>
-            </div>
-          </div>
+          <div className="flex items-center justify-center py-2 lg:py-0">
+            <div className="absolute hidden h-[70%] w-px bg-gradient-to-b from-transparent via-white/10 to-transparent lg:block" />
+            <div className="h-px flex-1 bg-gradient-to-r from-transparent via-white/10 to-transparent lg:hidden" />
 
-          <div className="flex items-center justify-center gap-4 py-2 lg:hidden">
-            <div className="h-px flex-1 bg-gradient-to-r from-transparent via-white/10 to-transparent" />
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl border border-white/10 bg-white/[0.03] text-sm font-bold text-white/35">
-              vs
+            <div
+              ref={vsRef}
+              className="animate-float-slow relative z-10 mx-4 flex h-12 w-12 items-center justify-center rounded-2xl border border-white/10 bg-white/[0.03] backdrop-blur-xl sm:h-14 sm:w-14 lg:mx-0"
+            >
+              <span className="animate-pulse-ring absolute inset-0 rounded-2xl border border-white/10" />
+              <span className="text-base font-bold tracking-tight text-white/40 sm:text-lg">vs</span>
             </div>
-            <div className="h-px flex-1 bg-gradient-to-r from-transparent via-white/10 to-transparent" />
+
+            <div className="h-px flex-1 bg-gradient-to-r from-transparent via-white/10 to-transparent lg:hidden" />
           </div>
 
           <ComparisonCard
@@ -197,9 +279,7 @@ export function ComparisonSection() {
             titleIcon={<Crown className="h-5 w-5" />}
           >
             {vipItems.map((item) => (
-              <div key={item.text} data-comparison-item>
-                <ComparisonItem icon={item.icon} text={item.text} variant="positive" />
-              </div>
+              <ComparisonItem key={item.text} icon={item.icon} text={item.text} variant="positive" />
             ))}
           </ComparisonCard>
         </div>

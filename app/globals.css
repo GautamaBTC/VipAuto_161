@@ -171,93 +171,63 @@ select:focus-visible {
   transition-duration: 400ms;
 }
 
-.comparison-card {
+.cmp-card {
   position: relative;
   overflow: hidden;
   border-radius: 24px;
-  border: 1px solid;
   backdrop-filter: blur(20px);
-  transition: all 400ms ease;
+  transition: all 500ms ease;
 }
 
-.comparison-card--garage {
-  background: rgba(255, 255, 255, 0.02);
-  border-color: rgba(255, 255, 255, 0.08);
+.cmp-card--garage {
+  background: rgba(231, 76, 60, 0.03);
+  border: 1px solid rgba(231, 76, 60, 0.12);
 }
 
-.comparison-card--garage:hover {
-  background: rgba(255, 255, 255, 0.04);
-  border-color: rgba(255, 255, 255, 0.12);
+.cmp-card--garage:hover {
+  background: rgba(231, 76, 60, 0.05);
+  border-color: rgba(231, 76, 60, 0.2);
+  box-shadow: 0 20px 80px -20px rgba(231, 76, 60, 0.12);
 }
 
-.comparison-card--vip {
-  background: color-mix(in srgb, var(--accent), transparent 88%);
-  border-color: color-mix(in srgb, var(--accent), white 76%);
-  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.03);
+.cmp-card--vip {
+  background: rgba(0, 184, 148, 0.04);
+  border: 1px solid rgba(0, 184, 148, 0.16);
 }
 
-.comparison-card--vip:hover {
-  background: color-mix(in srgb, var(--accent), transparent 82%);
-  border-color: color-mix(in srgb, var(--accent-2), white 70%);
-  box-shadow: 0 20px 80px -20px rgba(215, 23, 23, 0.35);
+.cmp-card--vip:hover {
+  background: rgba(0, 184, 148, 0.08);
+  border-color: rgba(0, 184, 148, 0.28);
+  box-shadow: 0 20px 80px -20px rgba(0, 184, 148, 0.18);
 }
 
-.comparison-vip-line {
-  position: absolute;
-  top: 0;
-  left: 50%;
-  transform: translateX(-50%);
-  height: 2px;
-  width: 0;
-  border-bottom-left-radius: 999px;
-  border-bottom-right-radius: 999px;
-  background: linear-gradient(to right, transparent, var(--accent), transparent);
-  transition: width 500ms ease-out;
+@keyframes float-slow {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-6px);
+  }
 }
 
-.comparison-card--vip:hover .comparison-vip-line {
-  width: 60%;
+@keyframes pulse-ring {
+  0% {
+    transform: scale(1);
+    opacity: 0.4;
+  }
+  100% {
+    transform: scale(1.8);
+    opacity: 0;
+  }
 }
 
-.comparison-vip-corner {
-  position: absolute;
-  top: -64px;
-  right: -64px;
-  width: 160px;
-  height: 160px;
-  border-radius: 999px;
-  background: color-mix(in srgb, var(--accent-2), transparent 88%);
-  filter: blur(60px);
-  opacity: 0;
-  transition: opacity 700ms ease;
-  pointer-events: none;
+.animate-float-slow {
+  animation: float-slow 4s ease-in-out infinite;
 }
 
-.comparison-card--vip:hover .comparison-vip-corner {
-  opacity: 1;
-}
-
-.comparison-garage-dashed {
-  position: absolute;
-  inset: 0;
-  border-radius: 24px;
-  border: 1px dashed rgba(239, 68, 68, 0.16);
-  pointer-events: none;
-}
-
-.comparison-divider {
-  position: relative;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.comparison-divider::before {
-  content: "";
-  position: absolute;
-  width: 1px;
-  height: 100%;
-  background: linear-gradient(to bottom, transparent, rgba(255, 255, 255, 0.18), transparent);
+.animate-pulse-ring {
+  animation: pulse-ring 2s ease-out infinite;
 }
 
 @media (prefers-reduced-motion: reduce) {

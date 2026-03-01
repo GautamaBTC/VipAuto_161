@@ -19,42 +19,60 @@ export const ComparisonCard = forwardRef<HTMLDivElement, ComparisonCardProps>(
       <article
         ref={ref}
         className={cn(
-          "comparison-card group flex flex-col p-6 sm:p-8 lg:p-10",
-          isVip ? "comparison-card--vip" : "comparison-card--garage",
+          "cmp-card group flex flex-col p-5 sm:p-8 lg:p-10",
+          isVip ? "cmp-card--vip" : "cmp-card--garage",
         )}
       >
-        {isVip ? <div className="comparison-vip-line" /> : null}
-        {isVip ? <div aria-hidden className="comparison-vip-corner" /> : null}
+        <div
+          className={cn(
+            "absolute left-1/2 top-0 h-[2px] w-0 -translate-x-1/2 rounded-b transition-[width] duration-500 ease-out group-hover:w-3/5",
+            isVip
+              ? "bg-gradient-to-r from-transparent via-[#00b894] to-transparent"
+              : "bg-gradient-to-r from-transparent via-[#e74c3c]/70 to-transparent",
+          )}
+        />
+        <div
+          aria-hidden
+          className={cn(
+            "pointer-events-none absolute -right-16 -top-16 h-[160px] w-[160px] rounded-full blur-[60px] opacity-0 transition-opacity duration-700 group-hover:opacity-100",
+            isVip ? "bg-[#00b894]/15" : "bg-[#e74c3c]/10",
+          )}
+        />
 
         <div
           className={cn(
-            "mb-6 inline-flex w-fit items-center gap-2 rounded-full px-4 py-1.5 text-xs font-semibold uppercase tracking-wider",
+            "mb-5 inline-flex w-fit items-center gap-2 rounded-full px-4 py-1.5 text-[11px] font-semibold uppercase tracking-wider sm:mb-6 sm:text-xs",
             isVip
-              ? "border border-[var(--accent)]/35 bg-[var(--accent)]/15 text-[var(--accent-2)]"
-              : "border border-white/10 bg-white/[0.04] text-white/45",
+              ? "border border-[#00b894]/30 bg-[#00b894]/15 text-[#00b894]"
+              : "border border-[#e74c3c]/20 bg-[#e74c3c]/10 text-[#e74c3c]/75",
           )}
         >
-          {isVip ? <span className="h-1.5 w-1.5 rounded-full bg-[var(--accent)] animate-badge-pulse" /> : null}
+          <span className={cn("h-1.5 w-1.5 rounded-full", isVip ? "bg-[#00b894] animate-badge-pulse" : "bg-[#e74c3c]/65")} />
           {badge}
         </div>
 
-        <div className="mb-8 flex items-center gap-3">
+        <div className="mb-6 flex items-center gap-3 sm:mb-8">
           <div
             className={cn(
-              "flex h-11 w-11 items-center justify-center rounded-2xl",
-              isVip ? "bg-[var(--accent)]/15 text-[var(--accent-2)]" : "bg-white/[0.04] text-white/25",
+              "flex h-10 w-10 items-center justify-center rounded-2xl transition-all duration-400 group-hover:scale-110 sm:h-11 sm:w-11",
+              isVip ? "bg-[#00b894]/15 text-[#00b894]" : "bg-[#e74c3c]/10 text-[#e74c3c]/60",
             )}
           >
             {titleIcon}
           </div>
-          <h3 className={cn("text-xl font-bold tracking-tight sm:text-2xl", isVip ? "text-white" : "text-white/55")}>
+          <h3 className={cn("text-lg font-bold tracking-tight sm:text-xl lg:text-2xl", isVip ? "text-white" : "text-white/50")}>
             {title}
           </h3>
         </div>
 
-        <div className="flex flex-col gap-1">{children}</div>
+        <div className="flex flex-col gap-0.5 sm:gap-1">{children}</div>
 
-        {!isVip ? <div aria-hidden className="comparison-garage-dashed" /> : null}
+        {!isVip ? (
+          <div
+            aria-hidden
+            className="pointer-events-none absolute inset-0 rounded-3xl border border-dashed border-[#e74c3c]/15"
+          />
+        ) : null}
       </article>
     );
   },

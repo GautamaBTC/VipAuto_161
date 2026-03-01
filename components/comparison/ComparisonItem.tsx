@@ -13,16 +13,23 @@ export function ComparisonItem({ icon, text, variant }: ComparisonItemProps) {
   const isPositive = variant === "positive";
 
   return (
-    <div className={cn("group/item flex items-start gap-4 rounded-2xl p-4 transition-all duration-300 hover:bg-white/[0.03]")}>
+    <div
+      data-comparison-item
+      className={cn(
+        "group/item flex items-start gap-3 rounded-2xl p-3 transition-all duration-300 hover:bg-white/[0.03] will-change-transform sm:gap-4 sm:p-4",
+      )}
+    >
       <div
         className={cn(
-          "flex h-10 w-10 shrink-0 items-center justify-center rounded-xl transition-transform duration-400 group-hover/item:scale-110",
-          isPositive ? "bg-[var(--accent)]/15 text-[var(--accent-2)]" : "bg-red-500/10 text-red-300/80",
+          "flex h-9 w-9 shrink-0 items-center justify-center rounded-xl transition-all duration-400 group-hover/item:scale-110 group-hover/item:-rotate-3 sm:h-10 sm:w-10",
+          isPositive ? "bg-[#00b894]/15 text-[#00b894]" : "bg-[#e74c3c]/12 text-[#e74c3c]/70",
         )}
       >
         {icon}
       </div>
-      <p className={cn("pt-1.5 text-[15px] leading-relaxed", isPositive ? "text-white/82" : "text-white/45")}>{text}</p>
+      <p className={cn("pt-1 text-sm leading-relaxed sm:pt-1.5 sm:text-[15px]", isPositive ? "text-white/80" : "text-white/50")}>
+        {text}
+      </p>
     </div>
   );
 }
