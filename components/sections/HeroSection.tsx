@@ -1,7 +1,6 @@
 import { Magnetic } from "@/components/effects/Magnetic";
 import { ReverseParallaxBackground } from "@/components/effects/ReverseParallaxBackground";
 import { TypeWriter } from "@/components/effects/TypeWriter";
-import { Voltmeter } from "@/components/voltmeter/Voltmeter";
 import { siteConfig } from "@/lib/siteConfig";
 
 export function HeroSection() {
@@ -10,7 +9,6 @@ export function HeroSection() {
       <div className="container-shell">
         <div className="card-surface relative overflow-hidden p-7 sm:p-10">
           <ReverseParallaxBackground />
-          <Voltmeter autoAnimate animationInterval={3000} opacity={1} />
           <div className="relative grid gap-7 lg:items-center">
             <div>
               <p className="text-xs uppercase tracking-[0.2em] text-[var(--text-secondary)]">
