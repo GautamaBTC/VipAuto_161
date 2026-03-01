@@ -1,7 +1,6 @@
 "use client";
 
 import { useRef } from "react";
-import { useReducedMotion } from "@/hooks/useReducedMotion";
 import { cn } from "@/lib/cn";
 import { DEMO_VOLTAGES, SIZE_MAP } from "@/components/voltmeter/voltmeter.constants";
 import { VoltmeterArcBar } from "@/components/voltmeter/VoltmeterArcBar";
@@ -22,20 +21,19 @@ export function Voltmeter({
   className,
   onVoltageChange,
 }: VoltmeterProps) {
-  const reduced = useReducedMotion();
   const dim = SIZE_MAP[size];
   const tapIndexRef = useRef(0);
 
   const { state, containerRef, glowRef, animateTo } = useVoltmeter({
     voltage,
-    autoAnimate: reduced ? false : autoAnimate,
+    autoAnimate,
     animationInterval,
     onVoltageChange,
   });
 
   const { zone } = state;
 
-  const allowTapUpdate = reduced || !autoAnimate;
+  const allowTapUpdate = !autoAnimate;
   const onTapUpdate = () => {
     if (!allowTapUpdate || voltage !== undefined) return;
     tapIndexRef.current = (tapIndexRef.current + 1) % DEMO_VOLTAGES.length;
