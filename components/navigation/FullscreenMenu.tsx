@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, type ReactNode } from "react";
 import { gsap } from "gsap";
-import { ArrowUpRight, Clock, MapPin, Phone } from "lucide-react";
+import { ArrowUpRight, Clock, MapPin, Phone, X } from "lucide-react";
 import { cn } from "@/lib/cn";
 import { siteConfig } from "@/lib/siteConfig";
 
@@ -117,14 +117,14 @@ export function FullscreenMenu({ isOpen, onClose, children }: FullscreenMenuProp
   }, [isOpen, onClose]);
 
   return (
-    <div ref={overlayRef} className="fixed inset-0 z-[500]" style={{ visibility: "hidden", opacity: 0 }}>
-      <div className="absolute inset-0 bg-black/82 backdrop-blur-xl" onClick={onClose} aria-hidden="true" />
+    <div ref={overlayRef} className="fixed inset-0 z-[1000]" style={{ visibility: "hidden", opacity: 0 }}>
+      <div className="absolute inset-0 bg-black/90 backdrop-blur-xl" onClick={onClose} aria-hidden="true" />
 
       <aside
         ref={panelRef}
         className={cn(
           "absolute right-0 top-0 flex h-full w-full flex-col",
-          "bg-[linear-gradient(180deg,#06060d_0%,#080913_45%,#090b16_100%)] sm:w-[440px] sm:border-l sm:border-white/12 sm:backdrop-blur-2xl",
+          "bg-[#05070f] sm:w-[440px] sm:border-l sm:border-white/15",
         )}
         role="dialog"
         aria-modal="true"
@@ -137,13 +137,16 @@ export function FullscreenMenu({ isOpen, onClose, children }: FullscreenMenuProp
             <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-white/20">Навигация</p>
             <div className="mt-2 h-px w-8 bg-gradient-to-r from-[var(--accent)] to-transparent" />
           </div>
-          <button
-            onClick={onClose}
-            className="flex items-center gap-2 rounded-xl px-3 py-1.5 text-[11px] font-medium tracking-wider text-white/30 transition-colors duration-300 hover:text-white/60"
-          >
-            закрыть
-            <kbd className="rounded bg-white/[0.06] px-1.5 py-0.5 text-[10px]">esc</kbd>
-          </button>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={onClose}
+              aria-label="Закрыть меню"
+              className="flex h-9 w-9 items-center justify-center rounded-xl border border-white/15 bg-white/5 text-white/75 transition-colors duration-300 hover:bg-white/10 hover:text-white"
+            >
+              <X className="h-4 w-4" />
+            </button>
+            <kbd className="rounded bg-white/[0.08] px-1.5 py-0.5 text-[10px] text-white/55">esc</kbd>
+          </div>
         </div>
 
         <nav ref={navRef} className="menu-scroll flex-1 overflow-y-auto px-4 sm:px-5" role="navigation">
