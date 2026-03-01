@@ -1,146 +1,124 @@
-"use client";
+﻿"use client";
 
-import { useRef } from "react";
+import type { FC } from "react";
 import { cn } from "@/lib/cn";
-import { DEMO_VOLTAGES, SIZE_MAP } from "@/components/voltmeter/voltmeter.constants";
-import { VoltmeterArcBar } from "@/components/voltmeter/VoltmeterArcBar";
-import { VoltmeterSegmentDisplay } from "@/components/voltmeter/VoltmeterSegmentDisplay";
-import { VoltmeterSparkline } from "@/components/voltmeter/VoltmeterSparkline";
-import { VoltmeterStatusPanel } from "@/components/voltmeter/VoltmeterStatusPanel";
-import type { VoltmeterProps } from "@/components/voltmeter/voltmeter.types";
-import { useVoltmeter } from "@/components/voltmeter/useVoltmeter";
+import type { VoltmeterProps } from "./voltmeter.types";
+import { SIZE_CONFIG } from "./voltmeter.constants";
+import { useVoltmeter } from "./useVoltmeter";
+import { VoltmeterMiniChart } from "./VoltmeterMiniChart";
+import { VoltmeterParticles } from "./VoltmeterParticles";
+import { VoltmeterRing } from "./VoltmeterRing";
+import { VoltmeterValue } from "./VoltmeterValue";
 
-export function Voltmeter({
+function hexToRgba(hex: string, alpha: number): string {
+  const clean = hex.replace("#", "");
+  const bigint = Number.parseInt(clean, 16);
+  const r = (bigint >> 16) & 255;
+  const g = (bigint >> 8) & 255;
+  const b = bigint & 255;
+  return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+}
+
+export const Voltmeter: FC<VoltmeterProps> = ({
   voltage,
   autoAnimate = true,
   animationInterval = 2500,
-  size = "md",
+  size = "lg",
   label = "Бортовое напряжение",
-  showSparkline = true,
-  showStatusPanel = true,
+  showChart = true,
   className,
   onVoltageChange,
-}: VoltmeterProps) {
-  const dim = SIZE_MAP[size];
-  const tapIndexRef = useRef(0);
-
-  const { state, containerRef, glowRef, animateTo } = useVoltmeter({
+}) => {
+  const { state, valueRef, ringRef, glowRingRef, wrapRef } = useVoltmeter({
     voltage,
     autoAnimate,
     animationInterval,
     onVoltageChange,
   });
 
-  const { zone } = state;
-
-  const allowTapUpdate = !autoAnimate;
-  const onTapUpdate = () => {
-    if (!allowTapUpdate || voltage !== undefined) return;
-    tapIndexRef.current = (tapIndexRef.current + 1) % DEMO_VOLTAGES.length;
-    const next = DEMO_VOLTAGES[tapIndexRef.current];
-    if (next !== undefined) animateTo(next);
-  };
+  const cfg = SIZE_CONFIG[size];
+  const zone = state.zone;
 
   return (
-    <div
-      ref={containerRef}
-      className={cn("relative mx-auto w-full select-none", className)}
-      style={{ maxWidth: dim.width }}
-      onClick={onTapUpdate}
-      role={allowTapUpdate && voltage === undefined ? "button" : undefined}
-      tabIndex={allowTapUpdate && voltage === undefined ? 0 : undefined}
-      onKeyDown={(event) => {
-        if (event.key === "Enter" || event.key === " ") onTapUpdate();
-      }}
-      aria-label={allowTapUpdate && voltage === undefined ? "Обновить значение вольтметра" : undefined}
-    >
+    <div ref={wrapRef} className={cn("relative flex select-none flex-col items-center", className)} style={{ width: cfg.container }}>
       <div
-        className="relative w-full overflow-hidden rounded-2xl border border-white/10"
+        className="relative w-full overflow-hidden rounded-3xl"
         style={{
-          minHeight: dim.height,
-          background: "linear-gradient(180deg, #0c0c14 0%, #08080e 50%, #0a0a12 100%)",
-          boxShadow:
-            "0 0 0 1px rgba(255,255,255,0.03), 0 20px 60px -15px rgba(0,0,0,0.72), inset 0 1px 0 rgba(255,255,255,0.04)",
+          background: "rgba(255,255,255,0.02)",
+          backdropFilter: "blur(40px)",
+          WebkitBackdropFilter: "blur(40px)",
+          border: "1px solid rgba(255,255,255,0.05)",
+          boxShadow: "0 0 0 0.5px rgba(255,255,255,0.04), 0 40px 80px -20px rgba(0,0,0,0.6)",
         }}
       >
         <div
-          ref={glowRef}
-          className="pointer-events-none absolute inset-0 transition-all duration-700"
-          style={{ background: `radial-gradient(ellipse at 50% 30%, ${zone.bgGlow} 0%, transparent 70%)` }}
-          aria-hidden
-        />
-
-        <div
-          className="pointer-events-none absolute inset-0 opacity-[0.03]"
+          className="pointer-events-none absolute -inset-1/2"
           style={{
-            backgroundImage:
-              "repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(255,255,255,0.45) 2px, rgba(255,255,255,0.45) 4px)",
+            background: `radial-gradient(300px circle at 50% 30%, ${hexToRgba(zone.color, 0.08)} 0%, transparent 70%)`,
+            transition: "background 1s ease",
           }}
           aria-hidden
         />
 
-        <div className="relative z-10 flex items-center justify-between border-b border-white/10 px-4 py-2.5">
-          <div className="flex items-center gap-2">
-            <span className="h-1.5 w-1.5 rounded-full" style={{ backgroundColor: zone.color, boxShadow: `0 0 8px ${zone.glowColor}` }} />
-            <span className="text-[10px] font-semibold uppercase tracking-[0.2em] text-[var(--text-secondary)]">{label}</span>
-          </div>
-          <div className="flex items-center gap-1.5">
-            <span className="text-[10px] leading-none" style={{ color: zone.color }}>
-              {zone.icon}
-            </span>
-            <span className="text-[10px] font-medium tracking-wider text-gray-500">LIVE</span>
-          </div>
-        </div>
+        <VoltmeterParticles color={zone.color} count={20} />
 
-        <div className="relative z-10 px-4 pb-1 pt-3">
-          <div className="relative mx-auto" style={{ maxWidth: 280 }}>
-            <VoltmeterArcBar voltage={state.displayVoltage} zone={zone} />
-            <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center">
-              <div className="w-[58%]">
-                <VoltmeterSegmentDisplay voltage={state.displayVoltage} zone={zone} />
-              </div>
-              <span className="mt-0.5 font-mono text-[11px] font-bold tracking-[0.25em]" style={{ color: zone.color, opacity: 0.68 }}>
-                VOLTS
-              </span>
+        <div
+          className="absolute left-1/2 top-0 h-px w-24 -translate-x-1/2"
+          style={{
+            background: `linear-gradient(90deg, transparent, ${hexToRgba(zone.color, 0.6)}, transparent)`,
+            transition: "background 0.8s ease",
+          }}
+          aria-hidden
+        />
+
+        <div className="relative z-10 flex flex-col items-center px-6 pb-5 pt-5">
+          <div className="mb-3 flex w-full items-center justify-between">
+            <span className="text-[10px] font-medium uppercase tracking-[0.2em] text-white/25">{label}</span>
+            <div className="flex items-center gap-1.5">
+              <span className="h-1 w-1 rounded-full" style={{ backgroundColor: zone.color, boxShadow: `0 0 4px ${zone.color}` }} />
+              <span className="text-[9px] font-medium tracking-wider text-white/20">LIVE</span>
             </div>
           </div>
-        </div>
 
-        <div className="relative z-10 mx-4 mb-3 flex items-center justify-center gap-2 rounded-lg border px-3 py-1.5" style={{ borderColor: `${zone.color}55`, backgroundColor: `${zone.color}12` }}>
-          <span className="text-sm" style={{ color: zone.color }}>
-            {zone.icon}
-          </span>
-          <span className="text-xs font-bold tracking-widest" style={{ color: zone.color, textShadow: `0 0 12px ${zone.glowColor}` }}>
-            {zone.label}
-          </span>
-          <span className="text-[10px] text-gray-500">
-            ({zone.min}-{zone.max}V)
-          </span>
-        </div>
-
-        {showStatusPanel ? (
-          <div className="relative z-10 px-4 pb-3">
-            <VoltmeterStatusPanel state={state} />
+          <div className="relative" style={{ width: cfg.ring * 2, height: cfg.ring * 2 }}>
+            <VoltmeterRing voltage={state.voltage} zone={zone} ringRef={ringRef} glowRingRef={glowRingRef} />
+            <div className="absolute inset-0 flex items-center justify-center">
+              <VoltmeterValue ref={valueRef} voltage={state.voltage} zone={zone} trend={state.trend} delta={state.delta} />
+            </div>
           </div>
-        ) : null}
 
-        {showSparkline && state.history.length >= 2 ? (
-          <div className="relative z-10 px-4 pb-4">
-            <VoltmeterSparkline history={state.history} zone={zone} />
-          </div>
-        ) : null}
-
-        <div className="relative z-10 border-t border-white/10 px-4 py-2">
-          <div className="flex items-center justify-between">
-            <span className="text-[9px] uppercase tracking-[0.15em] text-gray-600">
-              {allowTapUpdate && voltage === undefined ? "ТАП: ОБНОВИТЬ" : "АВТОЭЛЕКТРИК · ДИАГНОСТИКА"}
+          <div
+            className="mt-2 flex items-center gap-2 rounded-full px-4 py-1.5"
+            style={{
+              background: hexToRgba(zone.color, 0.08),
+              border: `1px solid ${hexToRgba(zone.color, 0.2)}`,
+              transition: "all 0.6s ease",
+            }}
+          >
+            <span className="h-1.5 w-1.5 rounded-full" style={{ backgroundColor: zone.color, boxShadow: `0 0 6px ${hexToRgba(zone.color, 0.8)}` }} />
+            <span className="text-[11px] font-semibold tracking-[0.15em]" style={{ color: zone.color, textShadow: `0 0 10px ${hexToRgba(zone.color, 0.3)}` }}>
+              {zone.label}
             </span>
-            <span className="font-mono text-[9px] text-gray-600">v2.0</span>
           </div>
+
+          {showChart && state.history.length >= 2 ? (
+            <div className="mt-4 w-full">
+              <VoltmeterMiniChart history={state.history} zone={zone} />
+            </div>
+          ) : null}
         </div>
+
+        <div
+          className="absolute bottom-0 left-1/2 h-px w-16 -translate-x-1/2"
+          style={{
+            background: `linear-gradient(90deg, transparent, ${hexToRgba(zone.color, 0.3)}, transparent)`,
+            transition: "background 0.8s ease",
+          }}
+          aria-hidden
+        />
       </div>
     </div>
   );
-}
+};
 
 export default Voltmeter;
